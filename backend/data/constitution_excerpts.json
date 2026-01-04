@@ -1,0 +1,32 @@
+{
+  "articles": {
+    "82": {
+      "text": "Article 82: Readjustment after each census - Upon the completion of each census, the allocation of seats in the House of the People to the States and the division of each State into territorial constituencies shall be readjusted by such authority and in such manner as Parliament may by law determine.",
+      "context": "This article governs how Lok Sabha seats are reallocated after each census. The problem for ONOE is that census-based readjustment has no provision for synchronizing state assembly terms with Lok Sabha terms."
+    },
+    "83": {
+      "text": "Article 83(2): Duration of Houses of Parliament - The House of the People, unless sooner dissolved, shall continue for five years from the date appointed for its first meeting and no longer and the expiration of the said period of five years shall operate as a dissolution of the House.",
+      "context": "Lok Sabha has a fixed 5-year term (expires May 2029). This operates independently of state assemblies, creating desynchronization challenges for ONOE."
+    },
+    "85": {
+      "text": "Article 85: Sessions of Parliament, prorogation and dissolution - The President may from time to time summon each House of Parliament to meet at such time and place as he thinks fit, but six months shall not intervene between its last sitting in one session and the date appointed for its first sitting in the next session. The President may from time to time prorogue the Houses or either House, and dissolve the House of the People.",
+      "context": "Presidential power to dissolve Lok Sabha exists, but no corresponding provision for simultaneous state assembly dissolution during ONOE."
+    },
+    "172": {
+      "text": "Article 172(1): Duration of State Legislatures - Every Legislative Assembly of every State, unless sooner dissolved, shall continue for five years from the date appointed for its first meeting and no longer and the expiration of the said period of five years shall operate as a dissolution of the Assembly.",
+      "context": "28 state assemblies each have independent 5-year terms with different expiry dates (e.g., UP: March 2027, WB: May 2026, Maharashtra: December 2031), making synchronization extremely complex."
+    },
+    "174": {
+      "text": "Article 174: Sessions of the State Legislature, prorogation and dissolution - The Governor shall from time to time summon the House or each House of the Legislature of the State to meet at such time and place as he thinks fit, but six months shall not intervene between its last sitting in one session and the date appointed for its first sitting in the next session. The Governor may from time to time prorogue the House or Houses, or dissolve the Legislative Assembly.",
+      "context": "Governor has unilateral power to dissolve state assembly at any time, which can break ONOE synchronization (e.g., if Punjab dissolves in 2027, it misses the 2029 ONOE cycle)."
+    },
+    "356": {
+      "text": "Article 356: Provisions in case of failure of constitutional machinery in States - If the President, on receipt of a report from the Governor of a State or otherwise, is satisfied that a situation has arisen in which the government of the State cannot be carried on in accordance with the provisions of this Constitution, the President may by Proclamation assume to himself all or any of the functions of the Government of the State and all or any of the powers vested in or exercisable by the Governor or any body or authority in the State other than the Legislature of the State.",
+      "context": "CRITICAL GAP: When a state is under President's Rule during ONOE elections, there is NO DEFINED PROCEDURE for how elections should be conducted. The Constitution is completely silent on this scenario. With 73% probability of state government collapse in a 5-year cycle, this is a fundamental blocker."
+    },
+    "82A": {
+      "text": "Article 82A: (Hypothetical) Provisions for synchronization of electoral cycles - This article would need to be inserted to provide legal framework for synchronizing Lok Sabha and State Assembly election cycles.",
+      "context": "Currently does not exist. Would need to be created through constitutional amendment to enable ONOE."
+    }
+  }
+}

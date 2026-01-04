@@ -1,0 +1,55 @@
+.monte-carlo-chart {
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-md);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+}
+
+.chart-title {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-primary);
+}
+
+.chart-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: var(--spacing-sm);
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: var(--radius-sm);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--color-text-primary);
+}
+
+.chart-container {
+    margin: var(--spacing-md) 0;
+}
+
+.chart-description {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-style: italic;
+    text-align: center;
+    margin-top: var(--spacing-sm);
+}

@@ -1,0 +1,272 @@
+.debate-visualization {
+    margin: var(--spacing-lg) 0;
+}
+
+.debate-title {
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.debate-subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+    font-style: italic;
+}
+
+.debate-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--spacing-md);
+    align-items: start;
+    margin-bottom: var(--spacing-lg);
+}
+
+.debate-side {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    min-height: 200px;
+}
+
+.government-side {
+    border-left: 4px solid #667eea;
+}
+
+.court-side {
+    border-right: 4px solid #f5576c;
+}
+
+.debate-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debate-icon {
+    font-size: 1.5rem;
+}
+
+.debate-header h5 {
+    color: var(--color-text-primary);
+    font-size: 1.125rem;
+}
+
+.debate-point {
+    margin-bottom: var(--spacing-sm);
+}
+
+.debate-text {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.vulnerability-meter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+}
+
+.meter-label {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.meter-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    background: var(--gradient-warning);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.meter-bar {
+    width: 80px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.meter-fill {
+    height: 100%;
+    background: var(--gradient-warning);
+    border-radius: 4px;
+}
+
+.meter-probability {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 0.25rem;
+}
+
+/* Assessment Section */
+.assessment-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.assessment-section h5 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.assessment-point {
+    color: var(--color-text-secondary);
+    padding: var(--spacing-sm);
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+}
+
+/* Mitigations Section */
+.mitigations-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.mitigations-section h5 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.mitigations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.mitigation-card {
+    background: rgba(56, 239, 125, 0.05);
+    border-left: 3px solid var(--color-risk-low);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+.mitigation-strategy {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.mitigation-basis {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.mitigation-text {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Full Transcript */
+.full-transcript {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.full-transcript details {
+    cursor: pointer;
+}
+
+.full-transcript summary {
+    color: var(--color-accent-blue);
+    font-weight: 600;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: background 0.3s ease;
+    list-style: none;
+}
+
+.full-transcript summary::-webkit-details-marker {
+    display: none;
+}
+
+.full-transcript summary:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.transcript-content {
+    margin-top: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.transcript-entry {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+}
+
+.transcript-entry.position {
+    background: rgba(102, 126, 234, 0.05);
+    border-left-color: #667eea;
+}
+
+.transcript-entry.counter {
+    background: rgba(245, 87, 108, 0.05);
+    border-left-color: #f5576c;
+}
+
+.transcript-entry.assessment {
+    background: rgba(245, 175, 25, 0.05);
+    border-left-color: #f5af19;
+}
+
+.transcript-entry.mitigation {
+    background: rgba(56, 239, 125, 0.05);
+    border-left-color: #38ef7d;
+}
+
+.transcript-speaker {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.transcript-text {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+    .debate-container {
+        grid-template-columns: 1fr;
+    }
+
+    .vulnerability-meter {
+        order: -1;
+    }
+
+    .mitigations-grid {
+        grid-template-columns: 1fr;
+    }
+}

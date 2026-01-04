@@ -1,0 +1,25 @@
+.risk-gauge {
+    position: relative;
+    display: inline-block;
+}
+
+.risk-gauge-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.risk-number {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--color-text-primary);
+}
+
+.risk-label {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-left: 2px;
+}

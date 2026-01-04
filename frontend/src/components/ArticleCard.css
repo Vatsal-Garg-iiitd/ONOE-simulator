@@ -1,0 +1,133 @@
+.article-card {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    min-height: 400px;
+}
+
+.article-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.article-info {
+    flex: 1;
+}
+
+.article-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.article-subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+.priority-badge {
+    background: var(--gradient-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    box-shadow: var(--shadow-glow);
+}
+
+.priority-number {
+    font-size: 1.125rem;
+}
+
+.article-card-body {
+    display: flex;
+    gap: var(--spacing-md);
+    flex: 1;
+}
+
+.risk-gauge-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.article-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.status-badge-container {
+    margin-bottom: var(--spacing-xs);
+}
+
+.article-description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.critical-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(255, 8, 68, 0.1);
+    border: 2px solid var(--color-risk-critical);
+    border-radius: var(--radius-sm);
+    color: var(--color-risk-critical);
+    font-weight: 600;
+    animation: pulse-critical 2s ease-in-out infinite;
+}
+
+.alert-icon {
+    font-size: 1.25rem;
+}
+
+.article-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-indicators {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.feature-dot {
+    font-size: 1.25rem;
+    cursor: help;
+    transition: transform 0.2s ease;
+}
+
+.feature-dot:hover {
+    transform: scale(1.2);
+}
+
+.view-details-btn {
+    background: none;
+    border: none;
+    color: var(--color-accent-blue);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.view-details-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(4px);
+}

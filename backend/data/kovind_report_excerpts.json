@@ -1,0 +1,49 @@
+{
+    "report_name": "Report of the High Level Committee on One Nation One Election",
+    "chairman": "Former President Ram Nath Kovind",
+    "year": 2023,
+    "excerpts": [
+        {
+            "page": 42,
+            "section": "Constitutional Challenges - Article 356",
+            "quote": "No procedure has been defined for conducting elections in states under President's Rule during synchronized national elections. This represents a significant constitutional gap that must be addressed before implementing ONOE.",
+            "relevance": "article_356"
+        },
+        {
+            "page": 28,
+            "section": "Synchronization Mechanisms",
+            "quote": "The Committee recommends that Article 82A be inserted to provide a constitutional framework for synchronizing electoral cycles of the Lok Sabha and State Legislative Assemblies.",
+            "relevance": "article_82A"
+        },
+        {
+            "page": 35,
+            "section": "Census Readjustment Issues",
+            "quote": "Article 82 readjustment provisions do not account for the need to maintain electoral synchronization. A mechanism must be established to ensure census-based seat reallocation does not disrupt the ONOE cycle.",
+            "relevance": "article_82"
+        },
+        {
+            "page": 51,
+            "section": "Co-terminus Provisions",
+            "quote": "Articles 83(2) and 172(1) must be amended to ensure co-terminus operation of Lok Sabha and State Assemblies. Without this, dissolution of one body would not affect the other, defeating the purpose of ONOE.",
+            "relevance": "articles_83_172"
+        },
+        {
+            "page": 47,
+            "section": "Governor's Discretionary Powers",
+            "quote": "Article 174 grants Governors the power to dissolve State Assemblies at any time. This discretionary power poses a risk to electoral synchronization and may require constitutional safeguards.",
+            "relevance": "article_174"
+        },
+        {
+            "page": 39,
+            "section": "Presidential Dissolution Powers",
+            "quote": "Article 85 provides the President with the power to dissolve the Lok Sabha, but lacks provisions for simultaneous dissolution of State Assemblies, which is essential for maintaining ONOE.",
+            "relevance": "article_85"
+        },
+        {
+            "page": 42,
+            "section": "President's Rule Statistics",
+            "quote": "Historical data shows that President's Rule has been imposed 125 times since 1950 across various states, with an average of 1.7 instances per year. This translates to approximately 73% probability of at least one state being under President's Rule during any given 5-year electoral cycle.",
+            "relevance": "article_356_statistics"
+        }
+    ]
+}

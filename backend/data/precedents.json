@@ -1,0 +1,76 @@
+{
+    "cases": [
+        {
+            "case_name": "Kesavananda Bharati v. State of Kerala",
+            "year": 1973,
+            "citation": "AIR 1973 SC 1461",
+            "summary": "Established the 'basic structure' doctrine - Parliament cannot amend the Constitution to destroy its basic structure. Federalism is a basic feature.",
+            "relevant_articles": [
+                83,
+                172,
+                356
+            ],
+            "impact_score": 5.0,
+            "relevance": "Any ONOE amendment that violates federalism (a basic structure) would be unconstitutional. Co-terminus provisions may be challenged as undermining state autonomy."
+        },
+        {
+            "case_name": "S.R. Bommai v. Union of India",
+            "year": 1994,
+            "citation": "AIR 1994 SC 1918",
+            "summary": "Limited the scope of Article 356 (President's Rule). Held that President's satisfaction is not beyond judicial review. State autonomy must be respected.",
+            "relevant_articles": [
+                356,
+                83,
+                172
+            ],
+            "impact_score": 5.0,
+            "relevance": "Restricts arbitrary use of President's Rule. Critical for Article 356 - any ONOE provision allowing elections during President's Rule must respect state autonomy principles established here."
+        },
+        {
+            "case_name": "State of Rajasthan v. Union of India",
+            "year": 1977,
+            "citation": "AIR 1977 SC 1361",
+            "summary": "Upheld dissolution of state assemblies and holding of fresh elections during President's Rule in 1977. Established precedent for elections under President's Rule.",
+            "relevant_articles": [
+                356
+            ],
+            "impact_score": 5.0,
+            "relevance": "Provides historical precedent that elections CAN be held during President's Rule. However, this was for individual states, not synchronized national elections - the gap remains."
+        },
+        {
+            "case_name": "Kihoto Hollohan v. Zachillhu",
+            "year": 1992,
+            "citation": "AIR 1993 SC 412",
+            "summary": "Upheld the anti-defection law (Tenth Schedule). Reinforced that constitutional amendments affecting basic democratic processes face strict scrutiny.",
+            "relevant_articles": [
+                83,
+                172
+            ],
+            "impact_score": 3.0,
+            "relevance": "Demonstrates that electoral process amendments are subject to judicial review. ONOE amendments affecting state assembly terms may face similar scrutiny."
+        },
+        {
+            "case_name": "Rameshwar Prasad v. Union of India",
+            "year": 2006,
+            "citation": "AIR 2006 SC 980",
+            "summary": "Further restricted Article 356. Held that President's Rule cannot be imposed merely on the ground of political instability without objective material.",
+            "relevant_articles": [
+                356
+            ],
+            "impact_score": 4.0,
+            "relevance": "Strengthens constraints on President's Rule. Reduces arbitrary imposition, but doesn't eliminate the 73% probability issue for ONOE."
+        },
+        {
+            "case_name": "Indira Nehru Gandhi v. Raj Narain",
+            "year": 1975,
+            "citation": "AIR 1975 SC 2299",
+            "summary": "Struck down the 39th Amendment that sought to place election disputes beyond judicial review. Free and fair elections are part of basic structure.",
+            "relevant_articles": [
+                83,
+                172
+            ],
+            "impact_score": 4.0,
+            "relevance": "Establishes that electoral integrity is a basic structure element. ONOE must not compromise free and fair elections at state or national level."
+        }
+    ]
+}

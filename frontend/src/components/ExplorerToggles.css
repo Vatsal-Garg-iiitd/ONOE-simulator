@@ -1,0 +1,87 @@
+.explorer-toggles {
+    margin: var(--spacing-lg) 0;
+}
+
+.toggles-title {
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.toggles-subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.toggles-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.toggle-item {
+    padding: var(--spacing-md);
+}
+
+.toggle-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.toggle-info {
+    flex: 1;
+}
+
+.toggle-question {
+    color: var(--color-text-primary);
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+}
+
+.toggle-description {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.toggle-control {
+    flex-shrink: 0;
+}
+
+.toggle-impact {
+    display: flex;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.impact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.impact-label {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.impact-value {
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.impact-value.positive {
+    background: rgba(56, 239, 125, 0.2);
+    color: var(--color-risk-low);
+}
+
+.impact-value.negative {
+    background: rgba(245, 87, 108, 0.2);
+    color: var(--color-risk-high);
+}
