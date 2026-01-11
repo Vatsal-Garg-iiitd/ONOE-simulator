@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONOE Fleet Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#0f172a',    // Slate 900
+                        colBg: '#1e293b',     // Slate 800
+                        cardBg: '#334155',    // Slate 700
+                        primary: '#8b5cf6',   // Violet 500 (Logistics)
+                        primaryDim: 'rgba(139, 92, 246, 0.2)',
+                        accent: '#a78bfa',    // Violet 400
+                        fuel: '#f43f5e',      // Rose 500
+                        rental: '#3b82f6',    // Blue 500
+                        textMain: '#f8fafc',
+                        textSub: '#94a3b8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        
+        /* Violet Slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #8b5cf6; margin-top: -6px; cursor: pointer;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: #334155; border-radius: 2px;
+        }
+
+        .scroller { overflow-y: auto; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden p-3 md:p-5">
+
+    <header class="shrink-0 mb-4 border-b border-slate-800 pb-4">
+        <div class="flex justify-between items-center">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Logistics & Transport</span>
+                    <span class="text-textSub text-xs uppercase tracking-widest font-bold">Interface 4</span>
+                </div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <span>🚛</span> Fleet Command Center
+                </h1>
+            </div>
+
+            <div class="flex gap-6 text-right">
+                <div>
+                    <div class="text-[10px] text-textSub uppercase">Active Fleet</div>
+                    <div class="text-xl font-bold text-white"><span id="kpiFleet">0</span> Units</div>
+                </div>
+                <div class="border-r border-slate-700 mx-2"></div>
+                <div>
+                    <div class="text-[10px] text-textSub uppercase">Fuel Burn</div>
+                    <div class="text-xl font-bold text-fuel">₹<span id="kpiFuel">0</span> Cr</div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-textSub uppercase text-primary">Total Logistics Cost</div>
+                    <div class="text-2xl font-bold text-white">₹<span id="kpiTotal">0</span> Cr</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-0">
+
+        <div class="lg:col-span-3 flex flex-col gap-5 overflow-y-auto">
+            
+            <div class="bg-colBg p-5 rounded-xl border border-slate-700 shadow-lg">
+                <h3 class="font-bold text-sm mb-6 flex items-center gap-2 text-primary uppercase tracking-wide">
+                    <span>📡</span> Dispatch Controls
+                </h3>
+
+                <div class="mb-8 group">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-textSub group-hover:text-white transition">AI Route Optimization</span>
+                        <span class="font-mono font-bold text-green-400" id="valRoute">0%</span>
+                    </div>
+                    <input type="range" id="sliderRoute" min="0" max="40" value="0" step="5" class="w-full" oninput="updateSim()">
+                    <div class="text-[10px] text-gray-500 mt-1">Consolidates routes. Reduces Km traveled.</div>
+                </div>
+
+                <div class="mb-8 group">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-textSub group-hover:text-white transition">Fuel Price (Avg)</span>
+                        <span class="font-mono font-bold text-fuel" id="valFuel">₹95/L</span>
+                    </div>
+                    <input type="range" id="sliderFuel" min="90" max="130" value="95" step="1" class="w-full" oninput="updateSim()">
+                    <div class="text-[10px] text-gray-500 mt-1">Impacts variable operational costs.</div>
+                </div>
+
+                <div class="mb-2 group">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-textSub group-hover:text-white transition">Fleet Mix (Light vs Heavy)</span>
+                        <span class="font-mono font-bold text-accent" id="valMix">Balanced</span>
+                    </div>
+                    <input type="range" id="sliderMix" min="0" max="100" value="50" step="10" class="w-full" oninput="updateSim()">
+                    <div class="text-[10px] text-gray-500 mt-1 flex justify-between">
+                        <span>More SUV</span>
+                        <span>More Bus</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-colBg p-4 rounded-xl border border-slate-700 shadow-lg flex-grow flex flex-col justify-center">
+                 <div class="text-textSub text-[10px] uppercase font-bold mb-2 text-center">Cost Split: Rental vs Fuel</div>
+                 <div class="w-full h-40 relative">
+                     <canvas id="doughnutChart"></canvas>
+                 </div>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-6 bg-colBg rounded-xl border border-slate-700 shadow-lg flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-slate-700 bg-slate-800/80 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-white text-sm">Logistics Friction Matrix</h3>
+                <div class="flex gap-3 text-[10px]">
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 bg-emerald-500 rounded-full"></div> Fluid</span>
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 bg-indigo-500 rounded-full"></div> Moderate</span>
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 bg-rose-500 rounded-full"></div> High Friction</span>
+                </div>
+            </div>
+            
+            <div class="scroller flex-grow p-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="matrixGrid">
+                    </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 flex flex-col gap-4 min-h-0">
+            
+            <div class="bg-colBg p-4 rounded-xl border border-slate-700 shadow-lg flex-grow flex flex-col min-h-0">
+                <h3 class="text-xs font-bold text-textSub uppercase mb-2">Top 5 Expensive Terrains</h3>
+                <div class="w-full flex-grow relative">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-cardBg p-4 rounded-xl border border-slate-600 shadow-lg shrink-0">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs text-gray-400">Total Distance (Est.)</span>
+                    <span class="text-lg font-bold text-white"><span id="valDistance">0</span> M km</span>
+                </div>
+                <button onclick="downloadCSV()" class="w-full bg-primary hover:bg-violet-600 text-white py-2 rounded-lg font-bold text-xs uppercase transition shadow-lg flex justify-center items-center gap-2">
+                    <span>📄</span> Export Logistics Plan
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATASET: LOGISTICS ---
+        // Simulated: State, Polling Stations (Route Nodes), Terrain Factor (1=Flat, 1.5=Hilly), Avg Distance Per Vehicle (km)
+        const rawCsvData = `State,Nodes_k,Terrain_Factor,Avg_Dist_Km
+Uttar Pradesh,160,1.0,120
+Maharashtra,95,1.2,140
+West Bengal,78,1.1,100
+Bihar,72,1.0,110
+Tamil Nadu,68,1.0,130
+Madhya Pradesh,65,1.2,180
+Karnataka,58,1.1,150
+Rajasthan,52,1.1,200
+Gujarat,51,1.0,140
+Andhra Pradesh,46,1.1,160
+Odisha,38,1.3,170
+Kerala,25,1.4,90
+Telangana,35,1.0,140
+Assam,28,1.4,180
+Punjab,24,1.0,80
+Haryana,19,1.0,70
+Chhattisgarh,23,1.3,190
+Jharkhand,29,1.3,160
+Himachal Pradesh,8,1.8,220
+Uttarakhand,11,1.7,210`;
+
+        let data = [];
+        let barChart, doughnutChart;
+        let currentSimData = [];
+
+        function init() {
+            const results = Papa.parse(rawCsvData, { header: true, dynamicTyping: true, skipEmptyLines: true });
+            data = results.data;
+            setupCharts();
+            updateSim();
+        }
+
+        // --- ENGINE ---
+        function calculateScenario() {
+            // Sliders
+            const optPct = parseInt(document.getElementById('sliderRoute').value) / 100;
+            const fuelPrice = parseInt(document.getElementById('sliderFuel').value);
+            const fleetMix = parseInt(document.getElementById('sliderMix').value); // 0=All SUV, 100=All Bus
+
+            // UI Label Updates
+            document.getElementById('valRoute').innerText = "-" + (optPct * 100) + "%";
+            document.getElementById('valFuel').innerText = "₹" + fuelPrice + "/L";
+            
+            let mixLabel = "Balanced";
+            if(fleetMix < 30) mixLabel = "Light (SUV)";
+            if(fleetMix > 70) mixLabel = "Heavy (Bus)";
+            document.getElementById('valMix').innerText = mixLabel;
+
+            // Fleet Params
+            // Mix determines: 1. Capacity per vehicle (Higher mix = fewer vehicles needed), 2. Mileage (Higher mix = lower mileage), 3. Rental (Higher mix = higher rental)
+            
+            // 0 (SUV): Cap 5, Mileage 12, Rent 2000
+            // 100 (Bus): Cap 40, Mileage 4, Rent 8000
+            // Interpolate based on slider
+            const ratio = fleetMix / 100;
+            const avgCap = 5 + (ratio * 35); // 5 to 40
+            const avgMileage = 12 - (ratio * 8); // 12 to 4
+            const avgRent = 2000 + (ratio * 6000); // 2000 to 8000
+
+            let totalVehicles = 0;
+            let totalFuelCost = 0;
+            let totalRentCost = 0;
+            let totalDistance = 0;
+
+            const simData = data.map(row => {
+                // 1. Vehicle Requirement
+                // Nodes * Personnel per Node / Capacity
+                // Assume avg 5 personnel per node needs transport
+                const personnelToMove = row.Nodes_k * 1000 * 5;
+                const vehicles = Math.ceil(personnelToMove / avgCap);
+
+                // 2. Distance Calculation
+                // Optimization reduces distance
+                const distance = vehicles * row.Avg_Dist_Km * row.Terrain_Factor * (1 - optPct);
+
+                // 3. Fuel Cost
+                // Cost = (Distance / Mileage) * FuelPrice
+                // Hilly terrain reduces mileage further (Terrain Factor acts as drag)
+                const realMileage = avgMileage / row.Terrain_Factor;
+                const fuelCost = (distance / realMileage) * fuelPrice;
+
+                // 4. Rental Cost
+                // Assume 2 days operation
+                const rentCost = vehicles * avgRent * 2;
+
+                // Friction Score for Heatmap (Cost per vehicle)
+                const costPerVehicle = (fuelCost + rentCost) / vehicles;
+                
+                totalVehicles += vehicles;
+                totalFuelCost += fuelCost;
+                totalRentCost += rentCost;
+                totalDistance += distance;
+
+                return {
+                    state: row.State,
+                    vehicles: vehicles,
+                    totalCost: (fuelCost + rentCost) / 10000000, // to Cr
+                    fuelCost: fuelCost / 10000000,
+                    rentCost: rentCost / 10000000,
+                    friction: costPerVehicle
+                };
+            });
+
+            return { totalVehicles, totalFuelCost, totalRentCost, totalDistance, simData };
+        }
+
+        function updateSim() {
+            const { totalVehicles, totalFuelCost, totalRentCost, totalDistance, simData } = calculateScenario();
+            currentSimData = simData;
+
+            // KPIs
+            const totalCostCr = (totalFuelCost + totalRentCost) / 10000000;
+            const fuelCr = totalFuelCost / 10000000;
+            
+            document.getElementById('kpiFleet').innerText = (totalVehicles / 1000).toFixed(1) + "k";
+            document.getElementById('kpiFuel').innerText = fuelCr.toFixed(0);
+            document.getElementById('kpiTotal').innerText = totalCostCr.toFixed(0);
+            document.getElementById('valDistance').innerText = (totalDistance / 1000000).toFixed(1);
+
+            // Render Matrix
+            renderMatrix(simData);
+
+            // Render Charts
+            updateCharts(simData, fuelCr, totalCostCr - fuelCr);
+        }
+
+        function renderMatrix(data) {
+            const grid = document.getElementById('matrixGrid');
+            grid.innerHTML = '';
+
+            // Sort so high friction is visible, or just map order? Let's keep map order but color code.
+            // Normalize friction for coloring
+            const maxFriction = Math.max(...data.map(d => d.friction));
+            
+            data.forEach(d => {
+                const intensity = d.friction / maxFriction;
+                
+                let borderColor, bgColor, textColor, statusText;
+                
+                if (intensity > 0.75) {
+                    borderColor = 'border-rose-500/50'; bgColor = 'bg-rose-900/20'; textColor = 'text-rose-400'; statusText = 'High Cost';
+                } else if (intensity > 0.4) {
+                    borderColor = 'border-indigo-500/50'; bgColor = 'bg-indigo-900/20'; textColor = 'text-indigo-400'; statusText = 'Moderate';
+                } else {
+                    borderColor = 'border-emerald-500/50'; bgColor = 'bg-emerald-900/10'; textColor = 'text-emerald-400'; statusText = 'Fluid';
+                }
+
+                const div = document.createElement('div');
+                div.className = `p-3 rounded border ${borderColor} ${bgColor} flex flex-col justify-between hover:brightness-110 transition`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="font-bold text-xs text-white truncate w-24">${d.state}</span>
+                        <div class="text-[9px] uppercase font-bold ${textColor}">${statusText}</div>
+                    </div>
+                    <div class="mt-2">
+                        <div class="flex justify-between text-[10px] text-gray-400">
+                            <span>Fleet</span>
+                            <span>${(d.vehicles/1000).toFixed(1)}k</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-mono font-bold text-white mt-1">
+                            <span>₹${d.totalCost.toFixed(1)} Cr</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // --- CHARTS ---
+        function setupCharts() {
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = '#334155';
+
+            // 1. Doughnut (Rent vs Fuel)
+            doughnutChart = new Chart(document.getElementById('doughnutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Fuel', 'Rental'],
+                    datasets: [{
+                        data: [50, 50],
+                        backgroundColor: ['#f43f5e', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10 } } }
+                }
+            });
+
+            // 2. Bar (Top Expensive States)
+            barChart = new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Logistics Cost (Cr)',
+                        data: [],
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { grid: { color: '#334155' } } }
+                }
+            });
+        }
+
+        function updateCharts(data, totalFuel, totalRent) {
+            // Doughnut
+            doughnutChart.data.datasets[0].data = [totalFuel, totalRent];
+            doughnutChart.update();
+
+            // Bar (Top 5)
+            const sorted = [...data].sort((a,b) => b.totalCost - a.totalCost).slice(0, 5);
+            barChart.data.labels = sorted.map(d => d.state);
+            barChart.data.datasets[0].data = sorted.map(d => d.totalCost);
+            barChart.update();
+        }
+
+        function downloadCSV() {
+            let csv = "State,Vehicles,Fuel_Cost_Cr,Rental_Cost_Cr,Total_Cost_Cr\n";
+            currentSimData.forEach(d => {
+                csv += `${d.state},${d.vehicles},${d.fuelCost.toFixed(2)},${d.rentCost.toFixed(2)},${d.totalCost.toFixed(2)}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'fleet_logistics_plan.csv';
+            a.click();
+        }
+
+        init();
+    </script>
+</body>
+</html>

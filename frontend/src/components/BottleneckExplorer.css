@@ -1,0 +1,66 @@
+.bottleneck-explorer {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-top: 2rem;
+}
+
+.sliders-container {
+    display: grid;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.slider-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #ccc);
+}
+
+.slider-value {
+    font-weight: bold;
+    color: var(--primary-color, #646cff);
+}
+
+.explorer-slider {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.explorer-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color, #646cff);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.explorer-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.risk-impact-indicator {
+    font-size: 0.8rem;
+    text-align: right;
+    color: #ff4d4d;
+    /* Assuming risk color */
+}
+
+.explorer-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}

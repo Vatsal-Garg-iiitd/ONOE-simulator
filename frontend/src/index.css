@@ -68,6 +68,33 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 8, 68, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: background-pulse 15s ease-in-out infinite;
+}
+
+@keyframes background-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -110,6 +137,36 @@ h6 { font-size: 1rem; }
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: rotate(45deg);
+  animation: glass-shimmer 4s infinite;
+}
+
+.glass-card:hover {
+  border-color: rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
+}
+
+@keyframes glass-shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 
 .gradient-text {
@@ -134,6 +191,29 @@ h6 { font-size: 1rem; }
   color: white;
   box-shadow: 0 0 20px rgba(255, 8, 68, 0.4);
   animation: pulse-critical 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-critical::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  animation: badge-shine 2s infinite;
+}
+
+@keyframes badge-shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 
 .badge-high {

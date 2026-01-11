@@ -1,18 +1,27 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import axios from 'axios'
-import Dashboard from './pages/Dashboard'
+import Home from './pages/Home'
+import ConstitutionalDashboard from './pages/Dashboard'
+import AdminDashboard from './pages/AdminDashboard'
 import './App.css'
 
 const API_BASE = 'http://localhost:8000'
 
-function App() {
+function AppContent() {
     const [articles, setArticles] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const location = useLocation()
 
     useEffect(() => {
-        fetchArticles()
-    }, [])
+        // Only fetch articles if we are on the Constitutional Dashboard
+        if (location.pathname === '/constitutional') {
+            fetchArticles()
+        } else {
+            setLoading(false) // Don't block other pages
+        }
+    }, [location.pathname])
 
     const fetchArticles = async () => {
         try {
@@ -46,35 +55,46 @@ function App() {
         }
     }
 
-    if (loading) {
-        return (
-            <div className="loading-screen">
-                <div className="loading-spinner"></div>
-                <h2 className="gradient-text">Loading Constitutional Engine...</h2>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <div className="error-screen">
-                <h2>⚠️ Error</h2>
-                <p>{error}</p>
-                <button className="btn btn-primary" onClick={fetchArticles}>
-                    Retry
-                </button>
-            </div>
-        )
-    }
-
     return (
         <div className="app">
-            <Dashboard
-                articles={articles}
-                onToggle={handleToggle}
-                onRefresh={fetchArticles}
-            />
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                    path="/constitutional"
+                    element={
+                        loading ? (
+                            <div className="loading-screen">
+                                <div className="loading-spinner"></div>
+                                <h2 className="gradient-text">Loading Constitutional Engine...</h2>
+                            </div>
+                        ) : error ? (
+                            <div className="error-screen">
+                                <h2>⚠️ Error</h2>
+                                <p>{error}</p>
+                                <button className="btn btn-primary" onClick={fetchArticles}>
+                                    Retry
+                                </button>
+                            </div>
+                        ) : (
+                            <ConstitutionalDashboard
+                                articles={articles}
+                                onToggle={handleToggle}
+                                onRefresh={fetchArticles}
+                            />
+                        )
+                    }
+                />
+                <Route path="/administrative" element={<AdminDashboard />} />
+            </Routes>
         </div>
+    )
+}
+
+function App() {
+    return (
+        <Router>
+            <AppContent />
+        </Router>
     )
 }
 

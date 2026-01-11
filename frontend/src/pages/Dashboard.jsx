@@ -5,10 +5,11 @@ import CriticalBlocker from '../components/CriticalBlocker'
 import DebateVisualization from '../components/DebateVisualization'
 import ExplorerToggles from '../components/ExplorerToggles'
 import MonteCarloChart from '../components/MonteCarloChart'
+import FeatureBreakdown from '../components/FeatureBreakdown'
 import './Dashboard.css'
 
-function Dashboard({ articles, onToggle, onRefresh }) {
-    const [selectedArticle, setSelectedArticle] = useState(null)
+function ConstitutionalDashboard({ articles, onToggle, onRefresh }) {
+    const [selectedArticleId, setSelectedArticleId] = useState(null)
 
     // Find Article 356 (critical blocker)
     const article356 = articles.find(a => a.article_number === 356)
@@ -22,8 +23,11 @@ function Dashboard({ articles, onToggle, onRefresh }) {
         (a.priority_rank || 999) - (b.priority_rank || 999)
     )
 
+    // Derive selected article from props to ensure reactivity
+    const selectedArticle = articles.find(a => a.article_number === selectedArticleId)
+
     const handleArticleClick = (article) => {
-        setSelectedArticle(article.article_number === selectedArticle?.article_number ? null : article)
+        setSelectedArticleId(article.article_number === selectedArticleId ? null : article.article_number)
     }
 
     return (
@@ -112,13 +116,16 @@ function Dashboard({ articles, onToggle, onRefresh }) {
                             <h2>Article {selectedArticle.article_number} - Detailed Analysis</h2>
                             <button
                                 className="close-btn"
-                                onClick={() => setSelectedArticle(null)}
+                                onClick={() => setSelectedArticleId(null)}
                             >
                                 ✕
                             </button>
                         </div>
 
                         <div className="detail-content">
+                            {/* Feature Breakdown - Show First */}
+                            <FeatureBreakdown article={selectedArticle} />
+
                             {/* Debate Visualization */}
                             {selectedArticle.debate_result && (
                                 <DebateVisualization debate={selectedArticle.debate_result} />
@@ -246,4 +253,4 @@ function Dashboard({ articles, onToggle, onRefresh }) {
     )
 }
 
-export default Dashboard
+export default ConstitutionalDashboard

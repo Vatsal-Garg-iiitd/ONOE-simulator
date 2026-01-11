@@ -5,6 +5,8 @@ Multi-node constitutional debate workflow using LangGraph and DeepSeek
 from langgraph.graph import StateGraph, END
 from langchain_huggingface import HuggingFaceEndpoint,ChatHuggingFace
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
+from models import VulnerabilityScoreAssessment, RiskMitigationResponse, MitigationStrategy
 
 from typing import TypedDict, List, Dict
 import json
@@ -36,6 +38,28 @@ class DebateState(TypedDict):
 # ============================================================================
 
 def get_llm():
+    """Initialize DeepSeek LLM via Hugging Face"""
+    api_key = os.getenv("HUGGINGFACE_API_KEY")
+    
+    if not api_key:
+        print("WARNING: HUGGINGFACE_API_KEY not found. Using mock responses.")
+        return None
+    
+    try:
+        llm = HuggingFaceEndpoint(
+            repo_id="HuggingFaceH4/zephyr-7b-beta",
+            huggingfacehub_api_token=api_key,
+            temperature=0.7,
+            max_new_tokens=512,
+            top_p=0.95
+        )
+        model = ChatHuggingFace(llm=llm)
+        return model
+    except Exception as e:
+        print(f"Error initializing Zephyr: {e}")
+        return None
+    
+def vulnerability_llm():
     """Initialize DeepSeek LLM via Hugging Face"""
     api_key = os.getenv("HUGGINGFACE_API_KEY")
     
@@ -190,7 +214,7 @@ def court_position_node(state: DebateState) -> DebateState:
 def vulnerability_assessment_node(state: DebateState) -> DebateState:
     """AI evaluates court challenge probability"""
     
-    llm = get_llm()
+    llm = vulnerability_llm()
     
     # Predefined vulnerability scores
     vulnerability_scores = {
@@ -202,31 +226,38 @@ def vulnerability_assessment_node(state: DebateState) -> DebateState:
     if llm is None:
         vulnerability = vulnerability_scores.get(state["article"], 0.65)
     else:
+        # Use PydanticOutputParser
+        parser = PydanticOutputParser(pydantic_object=VulnerabilityScoreAssessment)
+        
         prompt_template = ChatPromptTemplate.from_template(
             """Analyze litigation risk for this constitutional amendment.
-
-Article: {article}
-Government: {government_argument}
-Court: {court_argument}
-
-Based on federalism concerns, precedent strength, and court history, provide ONLY a JSON:
-{{"vulnerability_score": 0.XX, "reasoning": "brief explanation"}}
-
-Score 0.0-1.0 (higher = more likely court challenge)."""
+ 
+ Article: {article}
+ Government: {government_argument}
+ Court: {court_argument}
+ 
+ Based on federalism concerns, precedent strength, and court history, provide a vulnerability score (0.0 to 1.0) and explanation.
+ 
+ {format_instructions}"""
         )
         
         try:
-            chain = prompt_template | llm
-            response = chain.invoke({
+            chain = prompt_template | llm | parser
+            response: VulnerabilityScoreAssessment = chain.invoke({
                 "article": state["article"],
                 "government_argument": state["government_argument"],
-                "court_argument": state["court_argument"]
+                "court_argument": state["court_argument"],
+                "format_instructions": parser.get_format_instructions()
             })
             
-            result = json.loads(response.content.strip())
-            vulnerability = result.get("vulnerability_score", 0.68)
+            # The structured output returns a Pydantic object directly
+            vulnerability = response.vulnerability_score1
+            print(f"LLM Assessment: {vulnerability} - {response.explanation}")
+            
         except Exception as e:
             print(f"LLM error in assessment node: {e}")
+            import traceback
+            traceback.print_exc()
             vulnerability = vulnerability_scores.get(state["article"], 0.68)
     
     vulnerability = max(0, min(1, vulnerability))
@@ -269,6 +300,9 @@ def risk_mitigation_node(state: DebateState) -> DebateState:
     if llm is None:
         mitigations = fallback_mitigations.get(state["article"], [])
     else:
+        # Use PydanticOutputParser
+        parser = PydanticOutputParser(pydantic_object=RiskMitigationResponse)
+        
         prompt_template = ChatPromptTemplate.from_template(
             """Suggest constitutional safeguards to reduce court challenge risk.
 
@@ -276,22 +310,27 @@ Article: {article}
 Vulnerability: {vulnerability_score}
 Court Concern: {court_argument}
 
-Provide JSON list of 2 mitigations:
-{{"mitigations": [{{"strategy": "name", "legal_basis": "why this works"}}]}}"""
+Provide 2 mitigation strategies with legal basis.
+
+{format_instructions}"""
         )
         
         try:
-            chain = prompt_template | llm
-            response = chain.invoke({
+            chain = prompt_template | llm | parser
+            response: RiskMitigationResponse = chain.invoke({
                 "article": state["article"],
                 "vulnerability_score": state["vulnerability_score"],
-                "court_argument": state["court_argument"]
+                "court_argument": state["court_argument"],
+                "format_instructions": parser.get_format_instructions()
             })
             
-            result = json.loads(response.content.strip())
-            mitigations = result.get("mitigations", [])
+            # Convert Pydantic models to list of dicts for state
+            mitigations = [m.model_dump() for m in response.mitigations]
+            
         except Exception as e:
             print(f"LLM error in mitigation node: {e}")
+            import traceback
+            traceback.print_exc()
             mitigations = fallback_mitigations.get(state["article"], [])
     
     state["mitigations"] = mitigations

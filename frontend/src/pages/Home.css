@@ -1,0 +1,80 @@
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #1a1b26 0%, #000 100%);
+    color: #fff;
+    padding: 2rem;
+}
+
+.hero-section {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.main-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -2px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #888;
+    margin-top: 1rem;
+}
+
+.engine-selection {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.engine-card {
+    text-decoration: none;
+    color: inherit;
+    width: 350px;
+}
+
+.card-content {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.card-content:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+}
+
+.engine-card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.engine-card p {
+    color: #aaa;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.btn-text {
+    color: var(--primary-color, #646cff);
+    font-weight: bold;
+    font-size: 1.1rem;
+}

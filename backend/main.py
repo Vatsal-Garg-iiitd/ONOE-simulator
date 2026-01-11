@@ -4,7 +4,7 @@ Constitutional Engine for ONOE Analysis
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import articles, analysis
+from routes import articles, analysis, admin
 
 # Create FastAPI app
 app = FastAPI(
@@ -25,6 +25,7 @@ app.add_middleware(
 # Include routers
 app.include_router(articles.router)
 app.include_router(analysis.router)
+app.include_router(admin.router)
 
 @app.get("/")
 async def root():

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVM Financial Cockpit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#050505',
+                        panel: '#0f1014',
+                        panelBorder: '#27272a',
+                        primary: '#6366f1', // Indigo 500
+                        accent: '#a855f7', // Purple 500
+                        success: '#10b981',
+                        danger: '#f43f5e',
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body { 
+            background-color: #050505; 
+            background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 20%), 
+                              radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 20%);
+            color: #e2e8f0; 
+            font-family: 'Inter', sans-serif; 
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: rgba(15, 16, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Neon Range Slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #6366f1; margin-top: -6px; cursor: pointer;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
+            border: 2px solid #fff;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: #27272a; border-radius: 2px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden p-4">
+
+    <header class="flex justify-between items-center mb-5 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                <span class="text-xl">📊</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-white">EVM Financial <span class="gradient-text">Cockpit</span></h1>
+                <p class="text-[11px] text-gray-500 uppercase tracking-widest">Procurement Simulation V2.0</p>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <div class="glass-panel px-5 py-2 rounded-lg text-right min-w-[140px]">
+                <div class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Base Cycle Cost</div>
+                <div class="text-lg font-mono font-bold text-gray-300">₹<span id="kpiBase">0</span> Cr</div>
+            </div>
+            <div class="glass-panel px-5 py-2 rounded-lg text-right min-w-[140px] border-l-2 border-primary">
+                <div class="text-[10px] text-primary uppercase tracking-wider font-semibold">Projected Cost</div>
+                <div class="text-2xl font-mono font-bold text-white shadow-primary drop-shadow-sm">₹<span id="kpiSim">0</span> Cr</div>
+            </div>
+            <div class="glass-panel px-5 py-2 rounded-lg text-right min-w-[140px] border-l-2 border-danger">
+                <div class="text-[10px] text-danger uppercase tracking-wider font-semibold">Funding Gap</div>
+                <div class="text-lg font-mono font-bold text-danger">₹<span id="kpiGap">0</span> Cr</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-grow grid grid-cols-12 gap-5 min-h-0">
+
+        <div class="col-span-3 flex flex-col gap-4 overflow-y-auto">
+            
+            <div class="glass-panel p-5 rounded-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span class="text-primary">⚡</span> Parameters
+                    </h3>
+                    <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-gray-300">Live</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mb-6">
+                    <button onclick="setScenario('conservative')" class="bg-white/5 hover:bg-white/10 text-[10px] py-2 rounded border border-white/5 transition text-gray-300">Conservative</button>
+                    <button onclick="setScenario('realistic')" class="bg-primary/20 hover:bg-primary/30 text-[10px] py-2 rounded border border-primary/30 transition text-primary font-bold">Realistic</button>
+                    <button onclick="setScenario('crisis')" class="bg-danger/20 hover:bg-danger/30 text-[10px] py-2 rounded border border-danger/30 transition text-danger font-bold">Crisis</button>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-gray-400">Inventory Multiplier</span>
+                        <span class="font-mono font-bold text-primary" id="valMultiplier">2.0x</span>
+                    </div>
+                    <input type="range" id="sliderMultiplier" min="1.0" max="3.0" value="2.0" step="0.1" class="w-full" oninput="updateSim()">
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-gray-400">Tech Inflation</span>
+                        <span class="font-mono font-bold text-accent" id="valInflation">0%</span>
+                    </div>
+                    <input type="range" id="sliderInflation" min="-10" max="30" value="0" step="1" class="w-full" oninput="updateSim()">
+                </div>
+
+                 <div class="mb-2">
+                    <div class="flex justify-between text-xs mb-2">
+                        <span class="text-gray-400">Center Funding Share</span>
+                        <span class="font-mono font-bold text-success" id="valShare">50%</span>
+                    </div>
+                    <input type="range" id="sliderShare" min="0" max="100" value="50" step="5" class="w-full" oninput="updateSim()">
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col">
+                 <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 text-center">Funding Split</h3>
+                 <div class="flex-grow relative">
+                    <canvas id="doughnutChart"></canvas>
+                    <div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
+                        <span class="text-[10px] text-gray-500">Center Burden</span>
+                        <span class="text-xl font-bold text-white" id="centerCostDisplay">₹0</span>
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <div class="col-span-6 glass-panel p-1 rounded-2xl flex flex-col relative overflow-hidden">
+            <div class="absolute top-4 right-4 z-10 bg-black/40 p-1 rounded-lg flex gap-1 backdrop-blur-sm border border-white/5">
+                <button onclick="switchChart('bar')" class="px-3 py-1 text-[10px] rounded hover:bg-white/10 transition text-gray-300" id="btnBar">Bars</button>
+                <button onclick="switchChart('bubble')" class="px-3 py-1 text-[10px] rounded hover:bg-white/10 transition text-gray-500" id="btnBubble">Bubbles</button>
+            </div>
+            
+            <div class="p-4 border-b border-white/5 mb-2">
+                <h3 class="text-sm font-bold text-white">Cost Impact Projection</h3>
+            </div>
+
+            <div class="flex-grow w-full relative p-2">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-span-3 glass-panel rounded-2xl flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-white/5 bg-white/5 shrink-0 flex justify-between items-center">
+                <h3 class="text-xs font-bold text-gray-300 uppercase">State Manifest</h3>
+                <span class="text-[10px] text-primary">High Variance First</span>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto p-0">
+                <table class="w-full text-left border-collapse">
+                    <tbody id="stateTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATASET ---
+        const rawCsvData = `State,Category,Line_Item,Details,Funding,Standard_Cycle_Cost_Cr,ONOE_Cycle_Cost_Cr,Impact,Variance_Cr
+    Uttar Pradesh,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),544.05,1088.1,Cost Increase,544.05
+    Maharashtra,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),388.8,777.6,Cost Increase,388.8
+    West Bengal,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),396.9,793.8,Cost Increase,396.9
+    Bihar,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),328.05,656.1,Cost Increase,328.05
+    Tamil Nadu,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),315.9,631.8,Cost Increase,315.9
+    Madhya Pradesh,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),310.5,621.0,Cost Increase,310.5
+    Karnataka,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),302.4,604.8,Cost Increase,302.4
+    Rajasthan,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),270.0,540.0,Cost Increase,270.0
+    Gujarat,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),245.7,491.4,Cost Increase,245.7
+    Andhra Pradesh,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),236.25,472.5,Cost Increase,236.25
+    Odisha,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),198.45,396.9,Cost Increase,198.45
+    Kerala,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),189.0,378.0,Cost Increase,189.0
+    Assam,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),170.1,340.2,Cost Increase,170.1
+    Telangana,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),160.65,321.3,Cost Increase,160.65
+    Punjab,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),157.95,315.9,Cost Increase,157.95
+    Chhattisgarh,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),121.5,243.0,Cost Increase,121.5
+    Haryana,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),121.5,243.0,Cost Increase,121.5
+    Jammu & Kashmir,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),121.5,243.0,Cost Increase,121.5
+    Jharkhand,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),109.35,218.7,Cost Increase,109.35
+    Uttarakhand,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),94.5,189.0,Cost Increase,94.5
+    Delhi (NCT),Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),94.5,189.0,Cost Increase,94.5
+    Himachal Pradesh,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),91.8,183.6,Cost Increase,91.8
+    Tripura,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),81.0,162.0,Cost Increase,81.0
+    Meghalaya,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),81.0,162.0,Cost Increase,81.0
+    Manipur,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),81.0,162.0,Cost Increase,81.0
+    Nagaland,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),81.0,162.0,Cost Increase,81.0
+    Arunachal Pradesh,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),81.0,162.0,Cost Increase,81.0
+    Goa,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),54.0,108.0,Cost Increase,54.0
+    Mizoram,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),54.0,108.0,Cost Increase,54.0
+    Sikkim,Capital Assets,EVM Procurement,Ballot & Control Units,Center (LS) / State (VS),43.2,86.4,Cost Increase,43.2`;
+
+        let data = [];
+        let mainChart = null; 
+        let doughnutChart = null;
+        let currentChartType = 'bar'; // 'bar' or 'bubble'
+
+        // --- INITIALIZATION ---
+        function init() {
+            const results = Papa.parse(rawCsvData, { header: true, dynamicTyping: true, skipEmptyLines: true });
+            data = results.data.sort((a,b) => b.ONOE_Cycle_Cost_Cr - a.ONOE_Cycle_Cost_Cr);
+            
+            // Initial setup
+            setupDoughnut();
+            buildMainChart(); 
+            updateSim();
+        }
+
+        // --- CALCULATION LOGIC ---
+        function calculateScenario() {
+            const inflation = parseInt(document.getElementById('sliderInflation').value) / 100;
+            const multiplier = parseFloat(document.getElementById('sliderMultiplier').value);
+            const centerShare = parseInt(document.getElementById('sliderShare').value) / 100;
+
+            // UI Updates
+            document.getElementById('valInflation').innerText = (inflation > 0 ? "+" : "") + (inflation * 100) + "%";
+            document.getElementById('valMultiplier').innerText = multiplier.toFixed(1) + "x";
+            document.getElementById('valShare').innerText = (centerShare * 100) + "%";
+
+            let totalBase = 0;
+            let totalSim = 0;
+            let simData = [];
+
+            data.forEach(row => {
+                const baseCost = row.Standard_Cycle_Cost_Cr;
+                const simCost = baseCost * multiplier * (1 + inflation);
+                const variance = simCost - baseCost;
+
+                totalBase += baseCost;
+                totalSim += simCost;
+
+                simData.push({
+                    state: row.State,
+                    base: baseCost,
+                    sim: simCost,
+                    variance: variance
+                });
+            });
+
+            return { totalBase, totalSim, simData, centerShare };
+        }
+
+        // --- MAIN UPDATE LOOP ---
+        function updateSim() {
+            const { totalBase, totalSim, simData, centerShare } = calculateScenario();
+
+            // 1. Update KPIs
+            animateValue("kpiBase", totalBase);
+            animateValue("kpiSim", totalSim);
+            animateValue("kpiGap", totalSim - totalBase);
+            document.getElementById('centerCostDisplay').innerText = "₹" + (totalSim * centerShare).toFixed(0);
+
+            // 2. Update Charts with 'none' mode to prevent animation glitches
+            updateMainChartData(simData);
+            updateDoughnutData(totalSim, centerShare);
+
+            // 3. Update Table
+            renderTable(simData);
+        }
+
+        // --- CHART MANAGEMENT ---
+
+        function setupDoughnut() {
+            const ctx2 = document.getElementById('doughnutChart').getContext('2d');
+            Chart.defaults.font.family = 'Inter';
+            
+            doughnutChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Center Share', 'State Share'],
+                    datasets: [{
+                        data: [50, 50],
+                        backgroundColor: ['#6366f1', '#1e293b'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { legend: { display: false } },
+                    animation: { duration: 0 } // Disable global animation for smoothness
+                }
+            });
+        }
+
+        function buildMainChart() {
+            const ctx1 = document.getElementById('mainChart').getContext('2d');
+            
+            // Destroy existing to prevent memory leaks/glitches when switching types
+            if(mainChart) mainChart.destroy();
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 16, 20, 0.9)',
+                        borderColor: '#27272a',
+                        borderWidth: 1,
+                        titleColor: '#fff',
+                        bodyFont: { family: 'JetBrains Mono' }
+                    }
+                }
+            };
+
+            if (currentChartType === 'bar') {
+                mainChart = new Chart(ctx1, {
+                    type: 'bar',
+                    data: { labels: [], datasets: [] }, // Empty init
+                    options: {
+                        ...commonOptions,
+                        indexAxis: 'y',
+                        scales: {
+                            x: { grid: { color: '#27272a' }, ticks: { color: '#64748b' } },
+                            y: { grid: { display: false }, ticks: { color: '#94a3b8', font: {size: 10} } }
+                        }
+                    }
+                });
+            } else {
+                mainChart = new Chart(ctx1, {
+                    type: 'bubble',
+                    data: { datasets: [] },
+                    options: {
+                        ...commonOptions,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Base Cost (Cr)' },
+                                grid: { color: '#27272a' }, 
+                                ticks: { color: '#64748b' } 
+                            },
+                            y: { 
+                                title: { display: true, text: 'Projected Cost (Cr)' },
+                                grid: { color: '#27272a' }, 
+                                ticks: { color: '#64748b' } 
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateMainChartData(simData) {
+            if(!mainChart) return;
+            
+            const topData = simData.slice(0, 15);
+
+            if (currentChartType === 'bar') {
+                // Update labels
+                mainChart.data.labels = topData.map(d => d.state);
+                
+                // Check if datasets exist, if not create them (first run)
+                if(mainChart.data.datasets.length === 0) {
+                    mainChart.data.datasets = [
+                        { label: 'Base Cost', data: [], backgroundColor: '#1e293b', barPercentage: 0.6, categoryPercentage: 0.8, borderRadius: 4 },
+                        { label: 'New Cost', data: [], backgroundColor: '#6366f1', barPercentage: 0.6, categoryPercentage: 0.8, borderRadius: 4 }
+                    ];
+                }
+
+                // Update data arrays directly
+                mainChart.data.datasets[0].data = topData.map(d => d.base);
+                mainChart.data.datasets[1].data = topData.map(d => d.sim);
+                
+                // Dynamic color for dataset 1
+                mainChart.data.datasets[1].backgroundColor = topData.map(d => d.sim > 500 ? '#f43f5e' : '#6366f1');
+
+            } else {
+                // Bubble Logic
+                if(mainChart.data.datasets.length === 0) {
+                    mainChart.data.datasets = [{
+                        label: 'Cost Cluster',
+                        data: [],
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }];
+                }
+                
+                mainChart.data.datasets[0].data = topData.map(d => ({
+                    x: d.base,
+                    y: d.sim,
+                    r: Math.max(2, d.variance / 20) // Ensure min size
+                }));
+            }
+
+            // CRITICAL: Update with mode 'none' to stop animation glitches
+            mainChart.update('none');
+        }
+
+        function updateDoughnutData(total, centerShare) {
+            const centerAmt = total * centerShare;
+            const stateAmt = total * (1 - centerShare);
+            doughnutChart.data.datasets[0].data = [centerAmt, stateAmt];
+            doughnutChart.update('none');
+        }
+
+        // --- INTERACTION ---
+
+        function switchChart(type) {
+            if(currentChartType === type) return;
+            currentChartType = type;
+            
+            // Visual toggle
+            document.getElementById('btnBar').className = type === 'bar' ? 'text-white font-bold bg-white/20 px-3 py-1 rounded text-[10px]' : 'text-gray-500 hover:text-white px-3 py-1 rounded text-[10px]';
+            document.getElementById('btnBubble').className = type === 'bubble' ? 'text-white font-bold bg-white/20 px-3 py-1 rounded text-[10px]' : 'text-gray-500 hover:text-white px-3 py-1 rounded text-[10px]';
+            
+            // Rebuild and refresh
+            buildMainChart();
+            updateSim();
+        }
+
+        function setScenario(type) {
+            if(type === 'conservative') {
+                document.getElementById('sliderMultiplier').value = 1.2;
+                document.getElementById('sliderInflation').value = 5;
+                document.getElementById('sliderShare').value = 30;
+            } else if (type === 'realistic') {
+                document.getElementById('sliderMultiplier').value = 2.0;
+                document.getElementById('sliderInflation').value = 10;
+                document.getElementById('sliderShare').value = 50;
+            } else if (type === 'crisis') {
+                document.getElementById('sliderMultiplier').value = 2.5;
+                document.getElementById('sliderInflation').value = 25;
+                document.getElementById('sliderShare').value = 90;
+            }
+            updateSim();
+        }
+
+        function renderTable(simData) {
+            const tbody = document.getElementById('stateTableBody');
+            tbody.innerHTML = '';
+            simData.slice(0, 15).forEach((row) => {
+                const isHigh = row.variance > 200;
+                const varianceColor = isHigh ? 'text-danger' : 'text-primary';
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-white/5 hover:bg-white/5 transition group cursor-default";
+                tr.innerHTML = `
+                    <td class="p-3"><div class="text-[11px] font-bold text-gray-200 group-hover:text-white">${row.state}</div></td>
+                    <td class="p-3 text-right"><div class="font-mono text-[11px] text-gray-500">₹${row.base.toFixed(0)}</div></td>
+                    <td class="p-3 text-right"><div class="font-mono text-[11px] font-bold ${varianceColor}">₹${row.sim.toFixed(0)}</div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function animateValue(id, end) {
+            const obj = document.getElementById(id);
+            obj.innerText = end.toLocaleString(undefined, {maximumFractionDigits:0});
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

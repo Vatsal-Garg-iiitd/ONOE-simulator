@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVM Strategic Suite | Command</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandDark: '#0b1121', 
+                        brandBlue: '#3b82f6',
+                        brandSlate: '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        body { 
+            background: #0b1121; 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; 
+        }
+
+        #vanta-canvas {
+            position: absolute;
+            z-index: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+
+        /* Glass Panel Effect */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, border-color 0.2s, background 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Print Styles */
+        @media print {
+            #vanta-canvas, button { display: none !important; }
+            body { background: #fff; color: #000; }
+            .glass-panel, .dashboard-card { 
+                border: 1px solid #ccc; 
+                background: #fff; 
+                color: #000; 
+                box-shadow: none;
+            }
+            .text-white { color: #000 !important; }
+            .text-slate-400 { color: #555 !important; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col relative text-slate-100 selection:bg-blue-500 selection:text-white">
+
+    <div id="vanta-canvas"></div>
+
+    <div class="w-full z-20 border-b border-white/5 bg-brandDark/50 backdrop-blur-md px-6 py-2 flex justify-between items-center text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+        <div class="flex items-center gap-3">
+            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> System Operational</span>
+            <span class="text-slate-600">|</span>
+            <span>Ver 2.4.0 (Stable)</span>
+        </div>
+        <div>
+            SECURE CONNECTION // <span class="text-blue-400">ADMIN_ACCESS</span>
+        </div>
+    </div>
+
+    <div class="z-10 flex-grow flex flex-col px-6 py-4 md:px-12 md:py-6 h-full max-w-7xl mx-auto w-full justify-between">
+        
+        <header class="animate-fade-in space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-1">
+                        EVM Strategic Suite
+                    </h1>
+                    <p class="text-slate-400 font-light text-sm md:text-base">
+                        Centralized financial modeling & lifecycle simulation engine.
+                    </p>
+                </div>
+                <button onclick="downloadReport()" class="hidden md:block px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition shadow-lg shadow-blue-900/20 active:scale-95">
+                    Download Data (CSV) ▾
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                <div class="glass-panel rounded-lg p-3 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Total Forecast (ONOE)</span>
+                    <span class="text-lg md:text-xl font-semibold text-white mt-1">₹ 11,051 Cr</span>
+                </div>
+                <div class="glass-panel rounded-lg p-3 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Active Units (Inventory)</span>
+                    <span class="text-lg md:text-xl font-semibold text-white mt-1">1.45 Million</span>
+                </div>
+                <div class="glass-panel rounded-lg p-3 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Avg. Inflation Impact</span>
+                    <span class="text-lg md:text-xl font-semibold text-emerald-400 mt-1">▼ 1.02%</span>
+                </div>
+                
+                <div class="glass-panel rounded-lg p-3 flex flex-col border-l-2 border-l-amber-500">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Device Lifespan (Std)</span>
+                    <span class="text-lg md:text-xl font-semibold text-amber-400 mt-1">15 Years</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 flex-grow pb-4">
+            
+            <a href="interface1.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400 text-xl border border-blue-500/20">📊</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-blue-400">INT-01</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors">Procurement Engine</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        Inflation modeling, unit cost analysis, and state-budget impact simulations.
+                    </p>
+                </div>
+            </a>
+
+            <a href="interface2.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400 text-xl border border-purple-500/20">🚚</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-purple-400">INT-02</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-purple-400 transition-colors">Logistics & Supply</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        Optimized warehousing routes, inter-state movement tracking, and security timelines.
+                    </p>
+                </div>
+            </a>
+
+            <a href="interface3.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400 text-xl border border-emerald-500/20">♻️</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-emerald-400">INT-03</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-emerald-400 transition-colors">Lifecycle Analytics</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        FLC scheduling, degradation curves, and repair/maintenance forecasting.
+                    </p>
+                </div>
+            </a>
+
+            <a href="interface4.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400 text-xl border border-amber-500/20">👑</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-amber-400">INT-04</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-amber-400 transition-colors">Executive Overview</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        High-level KPI dashboards, national summaries, and exportable reports.
+                    </p>
+                </div>
+            </a>
+
+        </div>
+
+        <footer class="border-t border-white/5 pt-4 text-[10px] text-slate-500 flex justify-between items-center">
+            <span>Election Commission of India // Financial Analytics Division</span>
+            <div class="flex gap-4">
+                <span class="hover:text-white cursor-pointer">Support</span>
+                <span class="hover:text-white cursor-pointer">Documentation</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- VANTA BACKGROUND (Clean Professional Network) ---
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                VANTA.NET({
+                    el: "#vanta-canvas",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x3b82f6,       // Brand Blue
+                    backgroundColor: 0x0b1121, // Dark Navy
+                    points: 9.00,         // Reduced points for cleaner look
+                    maxDistance: 23.00,
+                    spacing: 18.00,
+                    showDots: true
+                })
+            } catch (e) {
+                console.log("Vanta JS failed to load.");
+            }
+        });
+    </script>
+
+    <script>
+        function downloadReport() {
+            const csvData = `Task_ID,Task_Name,Category,Sub_Unit_Details,Unit_Cost_INR,Quantity_LS_Only,Cost_LS_Only_Cr,Quantity_State_Only,Cost_State_Only_Cr,Quantity_ONOE,Cost_ONOE_Cr,Impact_Note,Normal_Cycle_Cost,Difference,Type
+1,EVM & VVPAT Procurement,Capital,Set (BU+CU+VVPAT),34000.0,13 Lakh Sets,4420,13 Lakh Sets,4420,26 Lakh Sets,8840,Requires double inventory immediately,4420,4420,Capital (Assets)
+2,Warehousing Infrastructure,Capital,Construction (per unit),2000000.0,Existing Stock,0,Existing Stock,0,2x Capacity,1200,New strong rooms needed for double EVM volume,0,1200,Capital (Assets)
+3,Polling Staff Remuneration,Operational,Team Wages (per booth),15000.0,1.5 Cr Staff,1800,1.5 Cr Staff,1800,1.5 Cr Staff,2000,Staff is shared but allowances slightly higher,3600,-1600,Operational (Running)
+4,Security Deployment (CAPF),Operational,Company Deployment,25000000.0,4000 Companies,2500,Varies by State,2500,4000 Companies,2500,Major saving: Forces move once instead of twice,5000,-2500,Operational (Running)
+5,Logistics & Transport,Operational,Vehicle Rent (per day),3000.0,12 Lakh Vehicles,1200,12 Lakh Vehicles,1200,12 Lakh Vehicles,1300,Same trucks can carry both machines,2400,-1100,Operational (Running)
+6,Polling Station Setup,Operational,Booth Setup (Tents/Power),4000.0,12 Lakh Booths,480,12 Lakh Booths,480,12 Lakh Booths,500,Physical booth structure is shared,960,-460,Operational (Running)
+7,IT Infrastructure,Operational,Webcast & GPS (per booth),1500.0,6 Lakh Booths (50%),200,6 Lakh Booths (50%),200,6 Lakh Booths (50%),220,Webcasting equipment shared for both polls,400,-180,Operational (Running)
+8,Training Material,Operational,Training Kit (per team),700.0,12 Lakh Teams,100,12 Lakh Teams,100,12 Lakh Teams,120,Combined manuals and training sessions,200,-80,Operational (Running)
+9,Voter Awareness (SVEEP),Operational,National Campaign,,National Scale,150,State Scale,150,Combined Scale,150,Unified message saves duplicate ad spend,300,-150,Operational (Running)
+10,VVPAT Slip Storage,Logistics,Storage (per vault/yr),5000.0,12 Months,50,12 Months,50,2x Volume,100,Double paper trail volume requires larger vaults,100,0,Capital (Assets)
+11,Ex-Gratia Compensation,Contingency,Death/Injury (Avg),2500000.0,Est 100 Cases,25,Est 100 Cases,25,Est 100 Cases,25,Risk exposure reduced (travel once),50,-25,Operational (Running)
+12,Counting Centers,Infrastructure,Hall Setup (per hall),500000.0,4000 Halls,200,4000 Halls,200,Larger Halls,300,Needs double tables or double time,400,-100,Capital (Assets)
+13,Observers (IAS/IPS),Admin,Allowance (per person),150000.0,3000 Observers,50,3000 Observers,50,3000 Observers,50,Same observers monitor both elections,100,-50,Operational (Running)
+14,Videography/CCTV,Surveillance,Camera Rent (per day),3000.0,Critical Booths,150,Critical Booths,150,Critical Booths,150,Same surveillance coverage utilized,300,-150,Operational (Running)
+15,E-Waste Disposal,Lifecycle,Destruction (per unit),500.0,Cyclic (15 yrs),10,Cyclic (15 yrs),10,Double Volume,20,Higher long-term environmental cost,10,10,Operational (Running)
+16,Contingency Fund,Contingency,Lump Sum,,Standard,100,Standard,100,Standard,100,Standard contingency,200,-100,Operational (Running)
+`;
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'onoe_data.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+
+</body>
+</html>

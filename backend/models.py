@@ -97,3 +97,27 @@ class OverallAnalysis(BaseModel):
 class ToggleRequest(BaseModel):
     toggle_id: str
     new_state: bool
+
+
+class VulnerabilityScoreAssessment(BaseModel):
+    vulnerability_score1: float = Field(ge=0, le=1, description="Likelihood of court challenge (0.0 to 1.0)")
+    explanation: str = Field(description="Brief explanation citing key constitutional risks")
+ 
+class MitigationStrategy(BaseModel):
+    strategy: str = Field(description="Name of the mitigation strategy")
+    legal_basis: str = Field(description="Constitutional or legal basis for this strategy")
+
+class RiskMitigationResponse(BaseModel):
+    mitigations: List[MitigationStrategy] = Field(description="List of suggested constitutional safeguards")
+
+class ResourceFeasibilityAssessment(BaseModel):
+    feasibility_score: float = Field(ge=0, le=1, description="Likelihood of successful implementation (0.0 to 1.0)")
+    bottle_necks: List[str] = Field(description="List of key bottlenecks identified")
+    explanation: str = Field(description="Brief explanation of the feasibility score")
+
+class ResourceMitigationStrategy(BaseModel):
+    strategy: str = Field(description="Name of the resource mitigation strategy")
+    action_plan: str = Field(description="Actionable steps to implement the strategy")
+
+class ResourceMitigationResponse(BaseModel):
+    mitigations: List[ResourceMitigationStrategy] = Field(description="List of suggested resource safeguards")

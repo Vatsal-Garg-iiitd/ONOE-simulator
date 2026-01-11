@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONOE Integrated Command | Galaxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    colors: {
+                        deepBg: '#050505',
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                        accentGold: '#fbbf24',
+                        accentBlue: '#3b82f6',
+                        accentGreen: '#10b981',
+                        accentPurple: '#8b5cf6',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #050505; color: #e2e8f0; overflow-x: hidden; overflow-y: auto; }
+        
+        #canvas-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            /* Darker background to make the dots POP */
+            background: #02040a;
+        }
+
+        /* Glassmorphism Card Style */
+        .engine-card {
+            background: rgba(15, 20, 30, 0.4); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .engine-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(30, 40, 50, 0.7);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.5);
+            border-color: var(--hover-color);
+        }
+
+        .engine-card:hover .icon-glow {
+            filter: drop-shadow(0 0 15px var(--hover-color));
+            transform: scale(1.1);
+        }
+
+        .engine-card:hover .arrow-btn {
+            background: var(--hover-color);
+            color: #000;
+            padding-left: 1.5rem;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.15;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <div id="canvas-bg"></div>
+    <div class="scanline"></div>
+
+    <nav class="w-full border-b border-white/5 bg-black/20 backdrop-blur-sm z-40 sticky top-0">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="font-mono text-xs text-gray-400 tracking-widest uppercase">Secure Link: Established</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden md:block">
+                    <div class="text-[10px] text-gray-500 uppercase tracking-wider">Current Session</div>
+                    <div class="font-mono text-xs text-blue-400">ADMIN_ROOT_ACCESS</div>
+                </div>
+                <div class="w-8 h-8 rounded border border-white/10 flex items-center justify-center bg-white/5">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center px-4 relative z-10 py-12">
+        
+        <div class="text-center mb-16 max-w-4xl mx-auto animate-float">
+            <div class="inline-block mb-4 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
+                <span class="text-[10px] font-bold text-blue-400 tracking-[0.2em] uppercase">Simultaneous Election Protocol</span>
+            </div>
+            <h1 class="font-display text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-tight">
+                One Nation <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400">One Election</span>
+            </h1>
+            <p class="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto font-light leading-relaxed">
+                Integrated strategic command interface for analyzing financial feasibility, constitutional amendments, administrative logistics, and governance continuity.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl mx-auto">
+
+            <a href="financial.html" class="engine-card group p-8 rounded-2xl relative overflow-hidden" style="--hover-color: #3b82f6;">
+                <div class="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-100 transition duration-500">
+                    <span class="text-6xl group-hover:rotate-12 transition transform block">📊</span>
+                </div>
+                <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                    <div>
+                        <div class="w-12 h-12 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mb-4 icon-glow transition duration-300">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold text-white group-hover:text-blue-400 transition">Financial Engine</h3>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                            Procurement simulation, EVM lifecycle costing, and budget impact analysis across state and central repositories.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status: <span class="text-emerald-500">Active</span></span>
+                        <div class="arrow-btn px-4 py-2 rounded-lg bg-white/5 text-white text-xs font-bold transition-all duration-300 flex items-center gap-2">
+                            Launch Interface <span>→</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="http://localhost:5173/constitutional" target="_blank" class="engine-card group p-8 rounded-2xl relative overflow-hidden" style="--hover-color: #fbbf24;">
+                <div class="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-100 transition duration-500">
+                    <span class="text-6xl group-hover:-rotate-12 transition transform block">⚖️</span>
+                </div>
+                <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                    <div>
+                        <div class="w-12 h-12 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mb-4 icon-glow transition duration-300">
+                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold text-white group-hover:text-amber-400 transition">Constitutional Engine</h3>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                            Legal framework analysis, Article 83/172 amendments, judicial review simulation, and ratification tracking.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status: <span class="text-emerald-500">Live Backend</span></span>
+                        <div class="arrow-btn px-4 py-2 rounded-lg bg-white/5 text-white text-xs font-bold transition-all duration-300 flex items-center gap-2">
+                            Launch Interface <span>→</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="http://localhost:5173/administrative" target="_blank" class="engine-card group p-8 rounded-2xl relative overflow-hidden" style="--hover-color: #10b981;">
+                <div class="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-100 transition duration-500">
+                    <span class="text-6xl group-hover:translate-x-2 transition transform block">🏗️</span>
+                </div>
+                <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                    <div>
+                        <div class="w-12 h-12 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mb-4 icon-glow transition duration-300">
+                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold text-white group-hover:text-emerald-400 transition">Administrative Engine</h3>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                            Logistics planning, warehousing optimization, security force (CAPF) deployment, and manpower scheduling.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status: <span class="text-emerald-500">Live Backend</span></span>
+                        <div class="arrow-btn px-4 py-2 rounded-lg bg-white/5 text-white text-xs font-bold transition-all duration-300 flex items-center gap-2">
+                            Launch Interface <span>→</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="governance.html" class="engine-card group p-8 rounded-2xl relative overflow-hidden" style="--hover-color: #8b5cf6;">
+                <div class="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-100 transition duration-500">
+                    <span class="text-6xl group-hover:scale-110 transition transform block">🏛️</span>
+                </div>
+                <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                    <div>
+                        <div class="w-12 h-12 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mb-4 icon-glow transition duration-300">
+                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold text-white group-hover:text-purple-400 transition">Governance Engine</h3>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                            Policy continuity assessment, federal structure impact, voter behavior analytics, and Model Code of Conduct tracking.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Status: <span class="text-emerald-500">Stable</span></span>
+                        <div class="arrow-btn px-4 py-2 rounded-lg bg-white/5 text-white text-xs font-bold transition-all duration-300 flex items-center gap-2">
+                            Launch Interface <span>→</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+
+    </main>
+
+    <footer class="w-full border-t border-white/5 bg-black/40 backdrop-blur-md py-4 mt-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center text-[10px] text-gray-600 uppercase tracking-widest">
+            <div>GovTech Initiative 2025</div>
+            <div class="flex gap-4">
+                <span>System Latency: 12ms</span>
+                <span>Encrypted: AES-256</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const scene = new THREE.Scene();
+        // Fog for depth (Distance culling)
+        scene.fog = new THREE.FogExp2(0x02040a, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-bg').appendChild(renderer.domElement);
+
+        // --- PART 1: THE MASSIVE CENTRAL CORE (Brighter) ---
+        const sphereGeo = new THREE.IcosahedronGeometry(35, 3);
+        const sphereMat = new THREE.MeshBasicMaterial({ 
+            color: 0x3b82f6, // Brighter Blue
+            wireframe: true, 
+            transparent: true, 
+            opacity: 0.15 // Increased Opacity
+        });
+        const mainSphere = new THREE.Mesh(sphereGeo, sphereMat);
+        scene.add(mainSphere);
+
+        // Inner glowing core points
+        const coreGeo = new THREE.BufferGeometry();
+        const coreCount = 2000;
+        const corePos = new Float32Array(coreCount * 3);
+        
+        for(let i=0; i<coreCount; i++) {
+            const r = 35;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            const x = r * Math.sin(phi) * Math.cos(theta);
+            const y = r * Math.sin(phi) * Math.sin(theta);
+            const z = r * Math.cos(phi);
+            
+            corePos[i*3] = x;
+            corePos[i*3+1] = y;
+            corePos[i*3+2] = z;
+        }
+        coreGeo.setAttribute('position', new THREE.BufferAttribute(corePos, 3));
+        const corePointsMat = new THREE.PointsMaterial({
+            color: 0x60a5fa, // Light Blue
+            size: 0.15,
+            transparent: true,
+            opacity: 0.9 // Higher Opacity
+        });
+        const corePoints = new THREE.Points(coreGeo, corePointsMat);
+        scene.add(corePoints);
+
+
+        // --- PART 2: THE AMBIENT STARFIELD (Full Screen Interaction) ---
+        const fieldGeo = new THREE.BufferGeometry();
+        const fieldCount = 4000;
+        const fieldPos = new Float32Array(fieldCount * 3);
+        const fieldOriginal = new Float32Array(fieldCount * 3);
+
+        for(let i=0; i<fieldCount; i++) {
+            const x = (Math.random() - 0.5) * 200;
+            const y = (Math.random() - 0.5) * 120;
+            const z = (Math.random() - 0.5) * 100;
+
+            fieldPos[i*3] = x;
+            fieldPos[i*3+1] = y;
+            fieldPos[i*3+2] = z;
+
+            fieldOriginal[i*3] = x;
+            fieldOriginal[i*3+1] = y;
+            fieldOriginal[i*3+2] = z;
+        }
+
+        fieldGeo.setAttribute('position', new THREE.BufferAttribute(fieldPos, 3));
+        
+        const fieldMat = new THREE.PointsMaterial({
+            color: 0xa5b4fc, // Bright Lavender/White
+            size: 0.25,      // Bigger size
+            transparent: true,
+            opacity: 0.8     // High Opacity
+        });
+        
+        const starField = new THREE.Points(fieldGeo, fieldMat);
+        scene.add(starField);
+
+
+        // --- INTERACTION LOGIC ---
+        camera.position.z = 60;
+
+        const mouse = new THREE.Vector2();
+        const target = new THREE.Vector2();
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX - windowHalfX);
+            mouse.y = (event.clientY - windowHalfY);
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            mainSphere.rotation.y += 0.001;
+            mainSphere.rotation.x += 0.0005;
+            corePoints.rotation.y += 0.001;
+            corePoints.rotation.x += 0.0005;
+
+            target.x = (mouse.x) * 0.001;
+            target.y = (mouse.y) * 0.001;
+
+            camera.rotation.y += 0.05 * ( - target.x - camera.rotation.y );
+            camera.rotation.x += 0.05 * ( - target.y - camera.rotation.x );
+
+            const positions = starField.geometry.attributes.position.array;
+            
+            const mouse3D_X = (mouse.x / windowHalfX) * 80; 
+            const mouse3D_Y = -(mouse.y / windowHalfY) * 50;
+
+            for(let i=0; i<fieldCount; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+
+                const px = positions[ix];
+                const py = positions[iy];
+
+                const dx = mouse3D_X - px;
+                const dy = mouse3D_Y - py;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                const radius = 25; 
+
+                if (dist < radius) {
+                    const force = (radius - dist) / radius;
+                    const angle = Math.atan2(dy, dx);
+                    
+                    const pushX = Math.cos(angle) * force * 2;
+                    const pushY = Math.sin(angle) * force * 2;
+
+                    positions[ix] -= pushX;
+                    positions[iy] -= pushY;
+                } else {
+                    positions[ix] += (fieldOriginal[ix] - positions[ix]) * 0.05;
+                    positions[iy] += (fieldOriginal[iy] - positions[iy]) * 0.05;
+                }
+            }
+
+            starField.geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        };
+
+        animate();
+    </script>
+</body>
+</html>

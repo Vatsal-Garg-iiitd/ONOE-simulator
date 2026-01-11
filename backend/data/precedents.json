@@ -71,6 +71,163 @@
             ],
             "impact_score": 4.0,
             "relevance": "Establishes that electoral integrity is a basic structure element. ONOE must not compromise free and fair elections at state or national level."
+        },
+        {
+            "case_name": "Minerva Mills Ltd. v. Union of India",
+            "year": 1980,
+            "citation": "AIR 1980 SC 1789",
+            "summary": "Reaffirmed and elaborated the basic structure doctrine. Struck down sections of the 42nd Amendment that sought to make Parliament’s amending power unlimited and to exclude judicial review of constitutional amendments. Held that limited amending power and judicial review are part of the basic structure and that harmony between Fundamental Rights and Directive Principles is itself a basic feature.",
+            "relevant_articles": [
+            368,
+            13
+            ],
+            "impact_score": 5.0,
+            "relevance": "Any ONOE amendment that (a) insulates itself from judicial review or (b) grants Parliament/Union an unlimited or overriding power to restructure electoral timelines or state terms would violate the basic structure as clarified here. This strengthens Kesavananda for challenging an over‑broad ONOE amendment."
+        },
+        {
+            "case_name": "I.C. Golaknath v. State of Punjab",
+            "year": 1967,
+            "citation": "AIR 1967 SC 1643",
+            "summary": "Held (by 6:5 majority) that Parliament could not amend Fundamental Rights, treating constitutional amendments as 'law' under Article 13. Though later modified by Kesavananda, it is a key precursor to the basic structure doctrine and emphasises the primacy and near‑entrenched nature of fundamental rights.",
+            "relevant_articles": [
+            13,
+            368
+            ],
+            "impact_score": 3.5,
+            "relevance": "Historically underscores judicial suspicion towards amendments curtailing core rights. For ONOE, it supports the narrative that amendments which significantly dilute democratic or federal guarantees (e.g. state representation, electoral choice windows) will attract heightened scrutiny."
+        },
+        {
+            "case_name": "R.C. Poudyal v. Union of India",
+            "year": 1993,
+            "citation": "1994 Supp (1) SCC 324",
+            "summary": "Upheld special electoral arrangements in Sikkim (including nomination of members and deviations from strict one-person-one-vote) against a basic structure challenge. The Court accepted that some asymmetry in representation is permissible so long as democracy and equality in their broad sense are preserved.",
+            "relevant_articles": [
+            170,
+            171,
+            327,
+            368
+            ],
+            "impact_score": 3.0,
+            "relevance": "Cuts both ways for ONOE: shows that the Court tolerates some calibrated deviation in electoral design, but only if the overall democratic character is preserved. A heavily centralising ONOE that systematically disadvantages certain states or voters could still be struck down."
+        },
+        {
+            "case_name": "R.C. Poudyal line follow‑up (special representation cases)",
+            "year": 1997,
+            "citation": "Related SCC follow‑ups on Sikkim representation",
+            "summary": "Subsequent decisions applied Poudyal’s reasoning to uphold special/transition electoral arrangements where justified by historical integration or small-state considerations, while reiterating that equality of vote is not absolute but cannot be arbitrarily distorted.",
+            "relevant_articles": [
+            170,
+            171,
+            327
+            ],
+            "impact_score": 2.5,
+            "relevance": "Relevant if ONOE uses transitional mechanisms (e.g. staggered truncation or extension of some assemblies) - these precedents suggest the Court may allow temporary, reasoned deviations, but not open‑ended or politically skewed ones."
+        },
+        {
+            "case_name": "Rameshwar Prasad v. Union of India (Bihar Assembly Dissolution case)",
+            "year": 2006,
+            "citation": "AIR 2006 SC 980",
+            "summary": "Held the premature dissolution of the Bihar Legislative Assembly under Article 356 unconstitutional. Clarified that Governor's reports and President's satisfaction must be based on objective material showing that government cannot be carried on in accordance with the Constitution. Recognised the Court’s power, in principle, to revive a dissolved Assembly, though it declined to do so because elections had already been notified.",
+            "relevant_articles": [
+            356,
+            174,
+            172
+            ],
+            "impact_score": 4.5,
+            "relevance": "Sharpens Bommai: any ONOE architecture which depends on frequently dissolving or not summoning assemblies, or using President's Rule as a timing tool, will be vulnerable. It also underlines that dissolution to engineer electoral synchronisation, without genuine breakdown, is unconstitutional."
+        },
+        {
+            "case_name": "Gujarat Assembly Election Reference (Election Commission of India v. State of Gujarat)",
+            "year": 2002,
+            "citation": "2002 (8) SCC 237",
+            "summary": "Constitution Bench interpreted Articles 174 and 324 after early dissolution of the Gujarat Assembly. Held that once an Assembly is dissolved, elections must be held within six months from the date of dissolution, and that the Election Commission has primacy in scheduling elections, subject to constitutional constraints and the need to ensure free and fair polls.",
+            "relevant_articles": [
+            174,
+            324,
+            172
+            ],
+            "impact_score": 4.0,
+            "relevance": "Directly relevant to ONOE timing: it constrains how far elections can be delayed after dissolution and emphasises ECI's independent role. Any ONOE amendment or statute that hands the Union executive a dominant say over election timing (bypassing or subordinating the ECI) would face serious challenge."
+        },
+        {
+            "case_name": "Gujarat Mazdoor Sabha v. State of Gujarat",
+            "year": 2020,
+            "citation": "2020 SCC OnLine SC 318",
+            "summary": "Struck down Gujarat's COVID-era notification relaxing labour protections under the Factories Act by wrongly invoking 'public emergency'. The Court, relying on Sarkaria Commission and Bommai, clarified that 'internal disturbance' or financial stress alone does not justify emergency‑type powers; the disturbance must be of such a character that it disrupts constitutional order.",
+            "relevant_articles": [
+            352,
+            355,
+            356
+            ],
+            "impact_score": 3.5,
+            "relevance": "Though about labour law, it imports Bommai/Sarkaria standards into modern jurisprudence. Supports the argument that using economic or administrative convenience as a ground to orchestrate President’s Rule or truncate/extend terms for ONOE would be unconstitutional."
+        },
+        {
+            "case_name": "Kuldip Nayar v. Union of India",
+            "year": 2006,
+            "citation": "AIR 2006 SC 3127",
+            "summary": "Upheld amendments abolishing 'domicile' requirement and introducing open ballot in Rajya Sabha elections. Held that within broad constitutional limits, Parliament can redesign aspects of the electoral system; however, it stressed that changes must not damage democratic principles or the federal balance.",
+            "relevant_articles": [
+            80,
+            81,
+            327,
+            368
+            ],
+            "impact_score": 3.5,
+            "relevance": "Shows deference to Parliament in technical electoral design, but within the frame of democracy and federalism as basic structure. ONOE-related amendments that are merely procedural/administrative stand on firmer ground than those that structurally centralise power or weaken states."
+        },
+        {
+            "case_name": "PUCL v. Union of India (Right to Vote & NOTA case line)",
+            "year": 2003,
+            "citation": "AIR 2003 SC 2363",
+            "summary": "Recognised the right to know the antecedents of candidates as part of Article 19(1)(a) and located aspects of the right to vote and information about candidates within the framework of free speech and free and fair elections. Subsequent NOTA judgment reinforced that electoral choices and transparency are integral to democratic legitimacy.",
+            "relevant_articles": [
+            19,
+            21,
+            326
+            ],
+            "impact_score": 3.5,
+            "relevance": "Builds on Indira Gandhi v. Raj Narain by thickening the content of 'free and fair elections'. ONOE devices (e.g. prolonged caretaker regimes, frequent simultaneous re-polls) that practically impair informed, meaningful choice can be assailed on this basis."
+        },
+        {
+            "case_name": "Union of India v. Rajendra N. Shah",
+            "year": 2021,
+            "citation": "AIR 2021 SC 4908",
+            "summary": "Struck down parts of the 97th Constitutional Amendment (co-operative societies) for lack of ratification under Article 368(2), holding that amendments touching entries in the State List that alter the federal balance require ratification by at least one‑half of the States.",
+            "relevant_articles": [
+            368,
+            246,
+            7
+            ],
+            "impact_score": 4.5,
+            "relevance": "Extremely important for ONOE: any constitutional amendment that restructures the tenure, dissolution, or electoral cycles of State Assemblies, or re-allocates electoral powers between Union and States, is arguably a 'federal' change and thus must undergo state ratification. ONOE passed without such ratification would be vulnerable on pure procedural grounds."
+        },
+        {
+            "case_name": "Extra-Judicial Execution Victim Families Association v. Union of India (Manipur AFSPA case)",
+            "year": 2016,
+            "citation": "AIR 2016 SC 3400",
+            "summary": "Discussed 'internal disturbance' and reiterated that emergencies and emergency-like powers must meet a high threshold, referencing Sarkaria Commission and earlier Article 356 jurisprudence. Emphasised that constitutional exceptionalism cannot become the norm.",
+            "relevant_articles": [
+            352,
+            355,
+            356
+            ],
+            "impact_score": 3.0,
+            "relevance": "Useful to counter any attempt to normalise President's Rule or emergency-style measures as routine tools to align election calendars for ONOE."
+        },
+        {
+            "case_name": "Naga People's Movement of Human Rights v. Union of India",
+            "year": 1998,
+            "citation": "AIR 1998 SC 431",
+            "summary": "While primarily about AFSPA, the Court examined the meaning of 'internal disturbance' and distinguished it from 'armed rebellion'. It drew upon Sarkaria Commission to hold that mere internal disturbance does not justify the highest forms of emergency power.",
+            "relevant_articles": [
+            352,
+            355,
+            356
+            ],
+            "impact_score": 3.0,
+            "relevance": "Reinforces the narrow construction of grounds for emergency and President's Rule, indirectly constraining any ONOE design that counts on broad, convenience-based uses of Article 356 as a synchronisation tool."
         }
+
     ]
 }
