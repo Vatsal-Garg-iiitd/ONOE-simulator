@@ -476,3 +476,43 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ---- Aesthetic refresh for Constitutional Engine (scoped) ---- */
+.dashboard {
+    --surface-bg: rgba(20, 24, 35, 0.6);
+    --surface-border: rgba(255, 255, 255, 0.06);
+    --surface-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Remove mirror/shimmer and tone down glass styling only on this page */
+.dashboard .glass-card {
+    background: var(--surface-bg);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--surface-shadow);
+}
+
+.dashboard .glass-card::before { content: none; }
+
+/* Calm down metric hover and remove glint */
+.dashboard .metric-card { transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease; }
+.dashboard .metric-card::before { content: none; }
+.dashboard .metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Remove header shimmer overlay */
+.dashboard .dashboard-header::before { content: none; }
+
+/* Improve article detail readability */
+.dashboard .article-detail {
+    background: linear-gradient(135deg, rgba(18, 22, 33, 0.92) 0%, rgba(24, 30, 44, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Subtle close button motion */
+.dashboard .close-btn { transition: transform 200ms ease, background 200ms ease; }
+.dashboard .close-btn:hover { transform: scale(1.05); }

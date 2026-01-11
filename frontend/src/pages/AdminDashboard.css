@@ -166,3 +166,40 @@ h1 {
     background: rgba(100, 108, 255, 0.2);
     transform: translateY(-1px);
 }
+
+/* ---- Aesthetic refresh for Administrative Engine (scoped) ---- */
+.admin-dashboard {
+    --surface-bg: rgba(20, 24, 35, 0.6);
+    --surface-border: rgba(255, 255, 255, 0.06);
+    --surface-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Remove mirror/shimmer and modernize card appearance only in Admin */
+.admin-dashboard .glass-card {
+    background: var(--surface-bg);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--surface-shadow);
+}
+.admin-dashboard .glass-card::before { content: none; }
+
+/* Feature cards: slightly larger hover and clearer borders */
+.admin-dashboard .feature-card {
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+.admin-dashboard .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(100, 108, 255, 0.35);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+/* Improve header legibility */
+.admin-dashboard .dashboard-header {
+    background: linear-gradient(135deg, rgba(18, 22, 33, 0.9) 0%, rgba(24, 30, 44, 0.9) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Space sections more comfortably */
+.admin-dashboard .container { padding-top: 1rem; }
+.admin-dashboard .bottleneck-section { margin-top: 2.5rem; }
