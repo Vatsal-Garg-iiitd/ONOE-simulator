@@ -74,27 +74,96 @@ class MonteCarloSimulator:
             np.percentile(simulated_risks, 97.5)
         ]
         
-        # Risk contribution is the uncertainty added by Monte Carlo
-        # Use the upper bound of CI minus base risk
-        risk_contribution = ci_95[1] - (base_risk if article_number in [83, 172, 356] else 15.0)
+        # Risk contribution is now purely informational (0.0 impact)
+        risk_contribution = 0.0
         
-        # For Article 356, use specific calculation
-        if article_number == 356:
-            risk_contribution = 18.3  # As specified in requirements
-        elif article_number == 83:
-            risk_contribution = min(risk_contribution, 10.0)
-        elif article_number == 172:
-            risk_contribution = min(risk_contribution, 12.0)
-        else:
-            risk_contribution = 0.0  # Not used for other articles
+        # Generate specific graph data based on article criteria
+        graph_data = self._generate_graph_data(article_number, simulated_risks, trials)
         
         return {
             "mean": round(mean, 2),
             "std_dev": round(std_dev, 2),
             "confidence_interval_95": [round(ci_95[0], 2), round(ci_95[1], 2)],
             "trials": trials,
-            "risk_contribution": round(risk_contribution, 2)
+            "risk_contribution": 0.0,
+            "graph_data": graph_data
         }
+
+    def _generate_graph_data(self, article_number: int, simulated_risks: np.ndarray, trials: int) -> Dict:
+        """Generate article-specific visualization data"""
+        
+        if article_number == 356:
+            # Type: Distribution (Histogram)
+            # Visualize the spread of risk outcomes
+            counts, bins = np.histogram(simulated_risks, bins=10, range=(0, 100))
+            return {
+                "type": "distribution",
+                "title": "Risk Probability Distribution",
+                "x_label": "Risk Score",
+                "y_label": "Frequency",
+                "data": [
+                    {"range": f"{int(bins[i])}-{int(bins[i+1])}", "frequency": int(c)} 
+                    for i, c in enumerate(counts)
+                ]
+            }
+            
+        elif article_number in [83, 172]:
+            # Type: Timeline (Line Chart)
+            # Visualize stability/survival probability over 5 years
+            years = [2029, 2030, 2031, 2032, 2033]
+            decay_rate = 0.05 if article_number == 83 else 0.08 # State assemblies are more volatile
+            stability = []
+            current_prob = 1.0
+            
+            for year in years:
+                # Slight randomness in decay
+                decay = np.random.normal(decay_rate, 0.01)
+                current_prob *= (1 - max(0, decay))
+                stability.append({
+                    "year": year, 
+                    "stability_prob": round(current_prob * 100, 1)
+                })
+                
+            return {
+                "type": "timeline",
+                "title": "Projected Stability over 5 Years",
+                "x_label": "Year",
+                "y_label": "Stability Probability (%)",
+                "data": stability
+            }
+            
+        elif article_number == 82:
+            # Type: Scatter
+            # Visualize Population Variance vs Seat Impact
+            scatter_data = []
+            for _ in range(50): # 50 points
+                pop_var = np.random.uniform(-10, 10)
+                seat_impact = pop_var * 1.5 + np.random.normal(0, 2)
+                scatter_data.append({
+                    "x": round(pop_var, 2),
+                    "y": round(seat_impact, 2)
+                })
+                
+            return {
+                "type": "scatter",
+                "title": "Population Change vs Seat Reallocation",
+                "x_label": "Population Variance (%)",
+                "y_label": "Seat Impact",
+                "data": scatter_data
+            }
+            
+        else:
+            # Default: Bar chart of Confidence Interval
+            mean = np.mean(simulated_risks)
+            return {
+                "type": "bar",
+                "title": "Risk Confidence Interval",
+                "data": [
+                    {"label": "Lower 95%", "value": round(np.percentile(simulated_risks, 2.5), 2)},
+                    {"label": "Mean", "value": round(mean, 2)},
+                    {"label": "Upper 95%", "value": round(np.percentile(simulated_risks, 97.5), 2)}
+                ]
+            }
 
 # Singleton instance
 monte_carlo_simulator = MonteCarloSimulator()

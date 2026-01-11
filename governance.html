@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONOE Governance Suite | Command</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandDark: '#0b1121', 
+                        brandPurple: '#8b5cf6',
+                        brandSlate: '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        body { 
+            background: #0b1121; 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; 
+        }
+
+        #vanta-canvas {
+            position: absolute;
+            z-index: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+
+        /* Glass Panel Effect */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, border-color 0.2s, background 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.4);
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col relative text-slate-100 selection:bg-purple-500 selection:text-white">
+
+    <div id="vanta-canvas"></div>
+
+    <div class="w-full z-20 border-b border-white/5 bg-brandDark/50 backdrop-blur-md px-6 py-2 flex justify-between items-center text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+        <div class="flex items-center gap-3">
+            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> System Operational</span>
+            <span class="text-slate-600">|</span>
+            <span>Ver 2.4.0 (Stable)</span>
+        </div>
+        <div>
+            SECURE CONNECTION // <span class="text-purple-400">GOV_ACCESS</span>
+        </div>
+    </div>
+
+    <div class="z-10 flex-grow flex flex-col px-6 py-4 md:px-12 md:py-6 h-full max-w-7xl mx-auto w-full justify-between">
+        
+        <header class="animate-fade-in space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-1">
+                        Governance Continuity Suite
+                    </h1>
+                    <p class="text-slate-400 font-light text-sm md:text-base">
+                        Policy impact modeling & governance efficiency simulation engine.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                <div class="glass-panel rounded-lg p-3 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Policy Days Lost</span>
+                    <span class="text-lg md:text-xl font-semibold text-white mt-1">1,275 Days</span>
+                </div>
+                <div class="glass-panel rounded-lg p-3 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Cost Impact (15Y)</span>
+                    <span class="text-lg md:text-xl font-semibold text-white mt-1">₹ 350k Cr</span>
+                </div>
+                <div class="glass-panel rounded-lg p-3 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">Efficiency Loss</span>
+                    <span class="text-lg md:text-xl font-semibold text-red-400 mt-1">▼ 35%</span>
+                </div>
+                
+                <div class="glass-panel rounded-lg p-3 flex flex-col border-l-2 border-l-purple-500">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">MCC Freeze Impact</span>
+                    <span class="text-lg md:text-xl font-semibold text-purple-400 mt-1">Critical</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 flex-grow pb-4">
+            
+            <a href="gov1.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400 text-xl border border-purple-500/20">🔒</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-purple-400">GOV-01</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-purple-400 transition-colors">Policy Paralysis Matrix</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        Governance freeze timeline analysis, MCC impact visualization, and policy execution efficiency tracking.
+                    </p>
+                </div>
+            </a>
+
+            <a href="gov2.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400 text-xl border border-emerald-500/20">💸</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-emerald-400">GOV-02</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-emerald-400 transition-colors">Fiscal Hemorrhage Dashboard</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        Multi-cycle expenditure analysis, shadow economy tracking, and inflation impact projections.
+                    </p>
+                </div>
+            </a>
+
+            <a href="gov3.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400 text-xl border border-blue-500/20">🏛️</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-blue-400">GOV-03</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors">Governance Impact Simulator</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        MCC duration modeling, project execution pipeline, resource diversion tracking, and GDP impact assessment.
+                    </p>
+                </div>
+            </a>
+
+            <a href="gov4.html" class="dashboard-card rounded-xl p-6 group flex flex-col justify-between min-h-[180px]">
+                <div class="flex justify-between items-start">
+                    <div class="p-3 bg-cyan-500/10 rounded-lg text-cyan-400 text-xl border border-cyan-500/20">📊</div>
+                    <span class="text-[10px] font-mono text-slate-600 group-hover:text-cyan-400">GOV-04</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white group-hover:text-cyan-400 transition-colors">Total Cost of Ownership</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        CAPEX vs OPEX analysis, campaign velocity tracking, and 15-year expenditure projections.
+                    </p>
+                </div>
+            </a>
+
+        </div>
+
+        <footer class="border-t border-white/5 pt-4 text-[10px] text-slate-500 flex justify-between items-center">
+            <span>Election Commission of India // Governance Analytics Division</span>
+            <div class="flex gap-4">
+                <span class="hover:text-white cursor-pointer">Support</span>
+                <span class="hover:text-white cursor-pointer">Documentation</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- VANTA BACKGROUND (Clean Professional Network) ---
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                VANTA.NET({
+                    el: "#vanta-canvas",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x8b5cf6,       // Brand Purple
+                    backgroundColor: 0x0b1121, // Dark Navy
+                    points: 9.00,
+                    maxDistance: 23.00,
+                    spacing: 18.00,
+                    showDots: true
+                })
+            } catch (e) {
+                console.log("Vanta JS failed to load.");
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,162 +1,308 @@
+/* Resource Debate View Styles */
 .debate-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    z-index: 1000;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 2rem;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
 }
 
-.debate-modal-content {
-    background: #1a1a20;
+.resource-debate-modal {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    max-width: 900px;
     width: 100%;
-    max-width: 800px;
     max-height: 90vh;
     overflow-y: auto;
-    padding: 2rem;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    color: #fff;
+    padding: 0;
 }
 
 .modal-header {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 1rem;
+    align-items: flex-start;
+    z-index: 10;
 }
 
 .modal-header h2 {
     margin: 0;
     font-size: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.debate-subtitle {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
 }
 
 .close-btn {
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 2rem;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: all 0.2s;
     line-height: 1;
 }
 
 .close-btn:hover {
-    color: #fff;
+    background: rgba(239, 68, 68, 0.3);
+    transform: scale(1.1);
 }
 
+/* Summary Section */
 .debate-summary {
+    margin: 1.5rem 2rem;
+    padding: 1.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-left: 4px solid rgba(59, 130, 246, 0.8);
+    border-radius: 12px;
+}
+
+.summary-header {
     display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
-.summary-item .label {
-    display: block;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #888;
-    margin-bottom: 0.5rem;
-}
-
-.summary-item .value {
+.summary-icon {
     font-size: 1.5rem;
-    font-weight: bold;
 }
 
-.value.critical {
-    color: #ff4d4d;
+.summary-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #60a5fa;
+}
+
+.debate-summary p {
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+    color: #e2e8f0;
+}
+
+.risk-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    background: rgba(251, 146, 60, 0.2);
+    border: 1px solid rgba(251, 146, 60, 0.5);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #fb923c;
+}
+
+.risk-badge strong {
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+/* Transcript Section */
+.transcript-section {
+    padding: 0 2rem 2rem 2rem;
+}
+
+.transcript-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f1f5f9;
+}
+
+.transcript-title span {
+    font-size: 1.3rem;
 }
 
 .transcript-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    margin-bottom: 2rem;
 }
 
-.debate-entry {
+.transcript-entry {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
-.speaker-label {
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: #aaa;
-    margin-left: 1rem;
+.speaker-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.speaker-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.speaker-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.speaker-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.argument-type {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: fit-content;
 }
 
 .argument-bubble {
-    background: #2a2a35;
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.25rem;
     border-radius: 12px;
-    border-top-left-radius: 2px;
-    line-height: 1.5;
-    position: relative;
+    margin-left: 3rem;
 }
 
-/* Speaker specific styles */
-.debate-entry.election .argument-bubble {
-    border-left: 3px solid #667eea;
+.argument-bubble p {
+    margin: 0;
+    line-height: 1.6;
+    color: #e2e8f0;
 }
 
-.debate-entry.manufacturers .argument-bubble {
-    border-left: 3px solid #ffd700;
-}
-
-.debate-entry.security .argument-bubble {
-    border-left: 3px solid #ff4d4d;
-}
-
-.debate-entry.ai .argument-bubble {
-    background: rgba(118, 75, 162, 0.2);
-    border: 1px solid rgba(118, 75, 162, 0.4);
-}
-
+/* Mitigations Section */
 .mitigations-section {
+    padding: 0 2rem 2rem 2rem;
+    margin-top: 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 2rem;
 }
 
+.mitigations-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+}
+
 .mitigation-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
-    margin-top: 1rem;
 }
 
 .mitigation-card {
-    background: rgba(100, 255, 100, 0.05);
-    border: 1px solid rgba(100, 255, 100, 0.1);
-    border-radius: 8px;
-    padding: 1rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.mitigation-number {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
 }
 
 .mitigation-card h4 {
-    color: #64ff64;
     margin: 0 0 0.5rem 0;
+    color: #10b981;
     font-size: 1rem;
+    padding-right: 2.5rem;
 }
 
 .mitigation-card p {
     margin: 0;
     font-size: 0.9rem;
-    color: #ddd;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+
+/* Scrollbar Styling */
+.resource-debate-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.resource-debate-modal::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.resource-debate-modal::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.5);
+    border-radius: 4px;
+}
+
+.resource-debate-modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .resource-debate-modal {
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .debate-summary,
+    .transcript-section,
+    .mitigations-section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .argument-bubble {
+        margin-left: 0;
+    }
+
+    .mitigation-grid {
+        grid-template-columns: 1fr;
+    }
 }

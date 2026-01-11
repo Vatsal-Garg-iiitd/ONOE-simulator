@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module A: Policy Paralysis | ONOE Engine</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Outfit"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+                    colors: { 
+                        deepBg: '#030712', 
+                        neonBlue: '#38bdf8',
+                        neonPurple: '#818cf8',
+                        neonRed: '#fb7185',
+                        neonGreen: '#34d399'
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.3)',
+                        'neon-red': '0 0 10px rgba(251, 113, 133, 0.5), 0 0 20px rgba(251, 113, 133, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #030712; color: #f8fafc; overflow-x: hidden; }
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        
+        /* Ultra Glass Panel */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .glass-panel:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+        /* Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #38bdf8; cursor: pointer; margin-top: -8px;
+            box-shadow: 0 0 15px #38bdf8; border: 2px solid #fff;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px;
+        }
+
+        /* Animations */
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scan-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;
+            background: linear-gradient(to bottom, transparent, rgba(56, 189, 248, 0.05), transparent);
+            animation: scanline 8s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-6 font-sans selection:bg-neonBlue selection:text-black">
+
+    <div id="canvas-bg"></div>
+
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 z-10">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <div class="px-2 py-0.5 rounded bg-blue-900/50 border border-blue-500/30 text-[10px] font-mono text-blue-300 uppercase tracking-widest">
+                    System Active
+                </div>
+                <div class="h-px flex-grow bg-gradient-to-r from-blue-500/50 to-transparent w-32"></div>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                Policy <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPurple">Paralysis</span> Matrix
+            </h1>
+        </div>
+
+        <div class="glass-panel p-1.5 flex items-center gap-1 rounded-full">
+            <button onclick="setMode(false)" id="btnReal" class="px-6 py-2 rounded-full text-xs font-bold transition-all bg-white/10 text-white shadow-lg border border-white/10">
+                Current Reality
+            </button>
+            <button onclick="setMode(true)" id="btnSim" class="px-6 py-2 rounded-full text-xs font-bold text-gray-400 transition-all hover:text-white border border-transparent">
+                ONOE Simulation
+            </button>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6 z-10 relative h-full">
+
+        <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
+            
+            <div class="glass-panel p-6 relative overflow-hidden group">
+                <div class="scan-overlay"></div>
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-neonRed/10 rounded-full blur-3xl group-hover:bg-neonRed/20 transition duration-500"></div>
+                
+                <h3 class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Governance Days Lost</h3>
+                <div class="flex items-end gap-3">
+                    <span class="text-6xl font-mono font-bold text-white tracking-tighter" id="totalDays">0</span>
+                    <span class="text-sm text-gray-500 mb-2">/ 3650</span>
+                </div>
+                
+                <div class="w-full h-2 bg-gray-800 rounded-full mt-6 overflow-hidden border border-white/5">
+                    <div id="barVisual" class="h-full bg-gradient-to-r from-neonRed to-orange-500 w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-[10px] text-gray-400 font-mono">
+                    <span>Efficiency Loss</span>
+                    <span id="percentLost" class="text-neonRed">0%</span>
+                </div>
+            </div>
+
+            <div id="simControls" class="glass-panel p-6 border-l-2 border-neonBlue transition-all duration-300 opacity-50 pointer-events-none scale-95 origin-left">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold text-neonBlue uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-neonBlue animate-pulse"></span>
+                        Sync Cycle Duration
+                    </span>
+                    <span class="text-xs font-mono text-white bg-blue-900/50 px-3 py-1 rounded border border-blue-500/30" id="sliderValDisplay">90 Days</span>
+                </div>
+                
+                <input type="range" min="45" max="120" value="90" step="5" class="mb-4" oninput="handleSlider(this.value)">
+                
+                <div class="p-3 rounded bg-green-900/20 border border-green-500/20 text-center">
+                    <div class="text-[10px] text-green-400 uppercase tracking-wider mb-1">Governance Reclaimed</div>
+                    <div class="text-2xl font-bold text-neonGreen" id="savedDays">+0 Days</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 glass-panel flex flex-col min-h-[550px]">
+            <div class="flex justify-between items-center p-5 border-b border-white/5 bg-white/5">
+                <h2 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Timeline Analysis
+                </h2>
+                <div class="flex gap-4 text-[10px] font-mono text-gray-400">
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-neonRed shadow-neon-red"></span> Critical</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-500"></span> High</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Standard</span>
+                </div>
+            </div>
+            
+            <div class="relative flex-grow w-full p-4">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-3 glass-panel flex flex-col overflow-hidden max-h-[600px]">
+            <div class="p-5 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-xs font-bold text-white uppercase tracking-wider">Event Log</h2>
+                <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-gray-300" id="eventCount">0 Events</span>
+            </div>
+            <div class="overflow-y-auto p-3 space-y-2 flex-grow custom-scroll" id="eventList">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION & DATA ---
+        
+        const rawData = [
+            {id:"E01", year:2014, name:"Lok Sabha 2014", type:"National", start:"2014-03-05", end:"2014-05-16", days:73, impact:"Critical"},
+            {id:"E02", year:2014, name:"State (MH, HR)", type:"State", start:"2014-09-12", end:"2014-10-19", days:37, impact:"High"},
+            {id:"E03", year:2014, name:"State (JH, JK)", type:"State", start:"2014-10-25", end:"2014-12-23", days:59, impact:"Standard"},
+            {id:"E04", year:2015, name:"Delhi Assembly", type:"State", start:"2015-01-12", end:"2015-02-10", days:29, impact:"High"},
+            {id:"E05", year:2015, name:"Bihar Assembly", type:"State", start:"2015-09-09", end:"2015-11-08", days:60, impact:"High"},
+            {id:"E06", year:2016, name:"Mega Assembly", type:"State", start:"2016-03-04", end:"2016-05-19", days:76, impact:"High"},
+            {id:"E07", year:2017, name:"State (UP, PB)", type:"State", start:"2017-01-04", end:"2017-03-11", days:66, impact:"Critical"},
+            {id:"E08", year:2017, name:"State (GJ, HP)", type:"State", start:"2017-10-12", end:"2017-12-18", days:67, impact:"High"},
+            {id:"E09", year:2018, name:"State (NE)", type:"State", start:"2018-01-18", end:"2018-03-03", days:44, impact:"Standard"},
+            {id:"E10", year:2018, name:"Karnataka", type:"State", start:"2018-03-27", end:"2018-05-15", days:49, impact:"High"},
+            {id:"E11", year:2018, name:"Hindi Belt", type:"State", start:"2018-10-06", end:"2018-12-11", days:66, impact:"High"},
+            {id:"E12", year:2019, name:"Lok Sabha 2019", type:"National", start:"2019-03-10", end:"2019-05-23", days:75, impact:"Critical"},
+            {id:"E13", year:2019, name:"State (MH, HR)", type:"State", start:"2019-09-21", end:"2019-10-24", days:33, impact:"High"},
+            {id:"E14", year:2019, name:"Jharkhand", type:"State", start:"2019-11-01", end:"2019-12-23", days:52, impact:"Standard"},
+            {id:"E15", year:2020, name:"Delhi 2020", type:"State", start:"2020-01-06", end:"2020-02-11", days:36, impact:"High"},
+            {id:"E16", year:2020, name:"Bihar 2020", type:"State", start:"2020-09-25", end:"2020-11-10", days:46, impact:"High"},
+            {id:"E17", year:2021, name:"Mega Assembly", type:"State", start:"2021-02-26", end:"2021-05-02", days:65, impact:"High"},
+            {id:"E18", year:2022, name:"State (UP, PB)", type:"State", start:"2022-01-08", end:"2022-03-10", days:61, impact:"Critical"},
+            {id:"E19", year:2022, name:"State (GJ, HP)", type:"State", start:"2022-10-14", end:"2022-12-08", days:55, impact:"High"},
+            {id:"E20", year:2023, name:"State (NE)", type:"State", start:"2023-01-18", end:"2023-03-02", days:43, impact:"Standard"},
+            {id:"E21", year:2023, name:"Karnataka", type:"State", start:"2023-03-29", end:"2023-05-13", days:45, impact:"High"},
+            {id:"E22", year:2023, name:"Hindi Belt", type:"State", start:"2023-10-09", end:"2023-12-03", days:55, impact:"High"},
+            {id:"E23", year:2024, name:"Lok Sabha 2024", type:"National", start:"2024-03-16", end:"2024-06-04", days:81, impact:"Critical"}
+        ];
+
+        let chart;
+        let isSim = false;
+        let simDuration = 90;
+        let debounceTimer;
+
+        // --- 2. CONTROLLER LOGIC ---
+
+        function setMode(mode) {
+            isSim = mode;
+            
+            // UI Toggle States
+            const btnReal = document.getElementById('btnReal');
+            const btnSim = document.getElementById('btnSim');
+            const simControls = document.getElementById('simControls');
+
+            if(isSim) {
+                // Sim Mode Active
+                btnReal.className = "px-6 py-2 rounded-full text-xs font-bold text-gray-400 transition-all hover:text-white border border-transparent";
+                btnSim.className = "px-6 py-2 rounded-full text-xs font-bold transition-all bg-neonBlue text-black shadow-lg shadow-neonBlue/30 border border-neonBlue";
+                
+                simControls.classList.remove('opacity-50', 'pointer-events-none', 'scale-95');
+                simControls.classList.add('opacity-100', 'scale-100');
+            } else {
+                // Real Mode Active
+                btnReal.className = "px-6 py-2 rounded-full text-xs font-bold transition-all bg-white/10 text-white shadow-lg border border-white/10";
+                btnSim.className = "px-6 py-2 rounded-full text-xs font-bold text-gray-400 transition-all hover:text-white border border-transparent";
+                
+                simControls.classList.add('opacity-50', 'pointer-events-none', 'scale-95');
+                simControls.classList.remove('opacity-100', 'scale-100');
+            }
+
+            refreshAll();
+        }
+
+        // --- 3. SLIDER HANDLER (DEBOUNCED) ---
+        
+        function handleSlider(val) {
+            // 1. Instant UI Update (No Lag)
+            simDuration = parseInt(val);
+            document.getElementById('sliderValDisplay').innerText = val + " Days";
+            
+            // 2. Debounced Chart Update (Performance)
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if(isSim) refreshAll();
+            }, 30); // 30ms wait is imperceptible but saves performance
+        }
+
+        // --- 4. DATA PROCESSING ---
+
+        function refreshAll() {
+            let data;
+            
+            if (!isSim) {
+                // Reality Data
+                data = rawData;
+            } else {
+                // Simulation Data
+                // Filter only National, set Duration to slider value
+                data = rawData.filter(d => d.type === 'National').map(d => {
+                    const startDate = new Date(d.start);
+                    const endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + simDuration);
+                    
+                    return {
+                        ...d,
+                        name: "Simultaneous Polls",
+                        days: simDuration,
+                        end: endDate.toISOString().split('T')[0],
+                        impact: "Critical"
+                    };
+                });
+            }
+
+            updateChart(data);
+            updateMetrics(data);
+            updateList(data);
+        }
+
+        // --- 5. CHART ENGINE (CHART.JS) ---
+
+        function updateChart(data) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+
+            // Format data for Chart.js floating bars
+            const chartData = data.map(d => ({
+                x: [d.start, d.end], // Dates
+                y: d.year.toString(),
+                name: d.name,
+                impact: d.impact,
+                days: d.days
+            }));
+
+            // If chart exists, update nicely; otherwise create
+            if (chart) {
+                chart.data.datasets[0].data = chartData;
+                chart.update('none'); // 'none' mode prevents full flicker
+            } else {
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [...new Set(rawData.map(d => d.year.toString()))],
+                        datasets: [{
+                            label: 'Governance Freeze',
+                            data: chartData,
+                            backgroundColor: (c) => {
+                                const ctx = c.chart.ctx;
+                                const area = c.chart.chartArea;
+                                if (!area) return null;
+                                // Dynamic Gradient based on impact
+                                const gradient = ctx.createLinearGradient(area.left, 0, area.right, 0);
+                                const item = c.raw;
+                                
+                                if (item && item.impact === 'Critical') {
+                                    gradient.addColorStop(0, '#fb7185'); // Neon Red
+                                    gradient.addColorStop(1, '#be123c');
+                                } else if (item && item.impact === 'High') {
+                                    gradient.addColorStop(0, '#f97316'); // Orange
+                                    gradient.addColorStop(1, '#c2410c');
+                                } else {
+                                    gradient.addColorStop(0, '#38bdf8'); // Blue
+                                    gradient.addColorStop(1, '#0ea5e9');
+                                }
+                                return gradient;
+                            },
+                            borderWidth: 0,
+                            borderRadius: 100, // Capsule shape
+                            borderSkipped: false,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 400, easing: 'easeOutQuart' },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: 'month' },
+                                min: '2014-01-01',
+                                max: '2025-01-01',
+                                grid: { color: 'rgba(255, 255, 255, 0.03)', borderDash: [4, 4] },
+                                ticks: { color: '#64748b', font: {family: 'JetBrains Mono', size: 10} }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: '#e2e8f0', font: {family: 'Outfit', weight: 'bold'} }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(3, 7, 18, 0.95)',
+                                titleFont: { family: 'Outfit', size: 14 },
+                                bodyFont: { family: 'JetBrains Mono', size: 12 },
+                                padding: 12,
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    title: (ctx) => ctx[0].raw.name,
+                                    label: (ctx) => ` Locked for ${ctx.raw.days} Days`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // --- 6. UI UPDATES ---
+
+        function updateMetrics(data) {
+            const total = data.reduce((acc, d) => acc + d.days, 0);
+            
+            // Smooth Counter
+            const el = document.getElementById('totalDays');
+            el.innerText = total;
+
+            // Bar visual
+            const percent = (total / 3650) * 100;
+            document.getElementById('barVisual').style.width = percent + "%";
+            document.getElementById('percentLost').innerText = percent.toFixed(1) + "%";
+
+            // Savings Logic
+            if(isSim) {
+                const realityTotal = 1275; // Approx real sum
+                const saved = realityTotal - total;
+                document.getElementById('savedDays').innerText = "+" + saved + " Days";
+            }
+        }
+
+        function updateList(data) {
+            const list = document.getElementById('eventList');
+            document.getElementById('eventCount').innerText = data.length + " Events";
+            list.innerHTML = '';
+
+            const sorted = [...data].sort((a,b) => new Date(a.start) - new Date(b.start));
+
+            sorted.forEach(d => {
+                const el = document.createElement('div');
+                let color = "bg-blue-500";
+                if(d.impact === 'Critical') color = "bg-neonRed shadow-[0_0_8px_rgba(251,113,133,0.6)]";
+                if(d.impact === 'High') color = "bg-orange-500";
+
+                el.className = "flex justify-between items-center p-3 rounded bg-white/5 border border-white/5 hover:border-white/20 transition group";
+                el.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-1.5 rounded-full ${color}"></div>
+                        <div>
+                            <div class="text-[11px] font-mono text-gray-500">${d.year}</div>
+                            <div class="text-xs font-bold text-white group-hover:text-blue-300 transition">${d.name}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-mono font-bold text-white">${d.days}d</div>
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        // --- 7. BACKGROUND VISUALS (THREE.JS) ---
+        function initBg() {
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x030712, 0.02);
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-bg').appendChild(renderer.domElement);
+
+            // Create Starfield
+            const count = 2000;
+            const pos = new Float32Array(count * 3);
+            for(let i=0; i<count*3; i++) {
+                pos[i] = (Math.random() - 0.5) * 120;
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const mat = new THREE.PointsMaterial({size: 0.1, color: 0x38bdf8, transparent: true, opacity: 0.8});
+            const stars = new THREE.Points(geo, mat);
+            scene.add(stars);
+
+            camera.position.z = 50;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                stars.rotation.y += 0.0003;
+                stars.rotation.x += 0.0001;
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth/window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Initialize
+        initBg();
+        refreshAll();
+
+    </script>
+</body>
+</html>

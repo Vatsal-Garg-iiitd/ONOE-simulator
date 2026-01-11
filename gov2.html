@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module B: Fiscal Hemorrhage | ONOE Engine</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Rajdhani"', 'sans-serif'], mono: ['"Share Tech Mono"', 'monospace'] },
+                    colors: { 
+                        deepBg: '#050a0a', 
+                        moneyGreen: '#10b981',
+                        alertRed: '#ef4444',
+                        gold: '#fbbf24',
+                        glass: 'rgba(20, 30, 30, 0.6)'
+                    },
+                    screens: {
+                        '3xl': '1800px' // For ultra-wide support
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* FIXED: Changed to overflow-x hidden to allow vertical scrolling */
+        body { background-color: #050a0a; color: #ecfdf5; overflow-x: hidden; overflow-y: auto; }
+        
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        
+        .glass-panel {
+            background: rgba(10, 20, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .neon-text { text-shadow: 0 0 5px rgba(16, 185, 129, 0.8); }
+        .neon-red { text-shadow: 0 0 5px rgba(239, 68, 68, 0.8); }
+        .neon-gold { text-shadow: 0 0 5px rgba(251, 191, 36, 0.8); }
+
+        .scan-line {
+            width: 100%; height: 2px; background: rgba(16, 185, 129, 0.5);
+            position: absolute; top: 0; animation: scan 3s linear infinite;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+            pointer-events: none;
+        }
+        @keyframes scan { 0% {top: 0%; opacity: 0;} 10% {opacity:1;} 90% {opacity:1;} 100% {top: 100%; opacity: 0;} }
+
+        /* Ticker Tape */
+        .ticker-wrap { overflow: hidden; white-space: nowrap; }
+        .ticker { display: inline-block; animation: ticker 40s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050a0a; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 font-sans selection:bg-moneyGreen selection:text-black">
+
+    <div id="canvas-bg"></div>
+
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 z-10 border-b border-white/10 pb-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <div class="w-2 h-2 bg-moneyGreen animate-pulse"></div>
+                <span class="text-xs font-mono text-moneyGreen/80 uppercase tracking-widest">Financial Intelligence Unit // Module B</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                Fiscal <span class="text-transparent bg-clip-text bg-gradient-to-r from-moneyGreen to-emerald-600">Hemorrhage</span>
+            </h1>
+        </div>
+
+        <div class="flex bg-black/40 rounded-lg p-1 border border-white/10 w-full md:w-auto">
+            <button onclick="setMode('reality')" id="btnReality" class="flex-1 md:flex-none px-4 md:px-6 py-2 rounded text-sm font-bold transition-all bg-alertRed/20 text-red-400 border border-alertRed/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                Status Quo
+            </button>
+            <button onclick="setMode('onoe')" id="btnOnoe" class="flex-1 md:flex-none px-4 md:px-6 py-2 rounded text-sm font-bold text-gray-500 hover:text-white transition-all">
+                ONOE Protocol
+            </button>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-4 flex-grow z-10 pb-8">
+
+        <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+            
+            <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
+                <div class="scan-line opacity-20"></div>
+                <h3 class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Est. 2029 Cycle Cost</h3>
+                <div class="flex items-baseline gap-1 flex-wrap">
+                    <span class="text-lg text-gray-500 font-bold">₹</span>
+                    <span class="text-4xl md:text-5xl font-mono font-bold text-white tracking-tighter" id="mainCostCounter">0</span>
+                    <span class="text-sm text-gray-400 font-bold">Cr</span>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+                    <span class="text-xs text-gray-500 uppercase">Cost Per Voter</span>
+                    <span class="text-xl font-mono text-moneyGreen neon-text" id="cpvCounter">₹ 0</span>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs text-gray-400 uppercase tracking-widest font-bold">Data Depth</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] uppercase font-bold" id="depthLabel">Official Only</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="icebergToggle" class="sr-only peer" onchange="toggleIceberg()">
+                            <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold"></div>
+                        </label>
+                    </div>
+                </div>
+                <div class="text-[10px] text-gray-500 leading-relaxed">
+                    <span class="text-gold font-bold">Warning:</span> Enabling "Shadow Economy" includes estimated black money, bribes, and unaccounted party spending based on CMS reports.
+                </div>
+            </div>
+
+            <div id="savingsPanel" class="glass-panel p-6 rounded-xl border-l-4 border-moneyGreen opacity-50 grayscale transition-all duration-500">
+                <h3 class="text-xs text-moneyGreen uppercase tracking-widest font-bold mb-1">Fiscal Recovery</h3>
+                <div class="text-3xl font-mono font-bold text-white mb-2" id="savingsCounter">₹ 0 Cr</div>
+                <p class="text-[10px] text-gray-400">Equivalent to building:</p>
+                <div class="mt-2 space-y-2">
+                    <div class="flex items-center gap-2 text-xs text-white">
+                        <span class="w-1 h-1 bg-moneyGreen rounded-full"></span>
+                        <span id="schoolsCount">0</span> New IIT Campuses
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-white">
+                        <span class="w-1 h-1 bg-moneyGreen rounded-full"></span>
+                        <span id="roadsCount">0</span> km Expressways
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 flex flex-col gap-4 min-h-[500px]">
+            <div class="glass-panel p-1 flex-grow rounded-xl relative flex flex-col min-h-[400px]">
+                <div class="absolute top-4 left-6 z-10">
+                    <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        Expenditure Velocity (1952-2029)
+                    </h2>
+                </div>
+                
+                <div class="w-full h-full p-2 pt-12 relative">
+                    <canvas id="mainChart"></canvas>
+                </div>
+
+                <div id="chartOverlay" class="absolute bottom-6 right-6 text-right pointer-events-none opacity-0 transition-opacity duration-500">
+                    <div class="text-4xl font-bold text-moneyGreen neon-text">-35%</div>
+                    <div class="text-xs uppercase tracking-widest text-white">Projected Efficiency Gain</div>
+                </div>
+            </div>
+
+            <div class="h-8 glass-panel rounded-full flex items-center px-4 overflow-hidden border-white/5 bg-black/20 shrink-0">
+                <div class="ticker-wrap w-full">
+                    <div class="ticker text-xs font-mono text-gray-400">
+                        LOGISTICS: <span class="text-red-400">Security Movement Cost ₹25L/Coy</span> /// 
+                        EVM UNITS: <span class="text-green-400">Shelf Life Ext +5 Years</span> /// 
+                        INFLATION ADJ: <span class="text-yellow-400">CPI Index 605 (2024)</span> /// 
+                        BLACK MONEY: <span class="text-red-400">Voter Inducement Spikes 400% in Split Cycles</span> ///
+                        STATE BLEED: <span class="text-orange-400">Maharashtra ₹1100Cr</span> /// 
+                        STATE BLEED: <span class="text-orange-400">UP ₹1850Cr</span> /// 
+                        STATE BLEED: <span class="text-orange-400">Karnataka ₹590Cr</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+            
+            <div class="glass-panel p-6 rounded-xl min-h-[300px] flex flex-col">
+                <h3 class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-4">The "Iceberg" (2024)</h3>
+                <div class="relative flex-grow flex items-center justify-center h-48">
+                    <canvas id="donutChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-[10px] text-gray-500">Total Est.</span>
+                        <span class="text-sm font-bold text-white">₹1.35 L Cr</span>
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-2 text-[10px] text-gray-400">
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>ECI Official</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-gray-600"></span>Campaign Ops</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span>Unaccounted</div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-0 rounded-xl flex-grow overflow-hidden flex flex-col h-80 lg:h-auto">
+                <div class="p-4 border-b border-white/5 bg-white/5 shrink-0">
+                    <h3 class="text-xs text-gray-400 uppercase tracking-widest font-bold">Cost Drivers</h3>
+                </div>
+                <div class="overflow-y-auto p-2 space-y-1 custom-scroll flex-grow text-xs">
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">Security Deployment</span>
+                        <span class="font-mono text-red-400">₹25L / Coy</span>
+                    </div>
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">EVM Control Unit</span>
+                        <span class="font-mono text-blue-400">₹9,812 / Unit</span>
+                    </div>
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">VVPAT System</span>
+                        <span class="font-mono text-blue-400">₹16,132 / Unit</span>
+                    </div>
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">Polling Staff Pay</span>
+                        <span class="font-mono text-red-400">₹15k / Head</span>
+                    </div>
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">Illegal Cash Seizure</span>
+                        <span class="font-mono text-gold">₹10k Cr+</span>
+                    </div>
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">Voter Cost (2024)</span>
+                        <span class="font-mono text-red-400">₹1,400 / Voter</span>
+                    </div>
+                    <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">Logistics (Trucks)</span>
+                        <span class="font-mono text-gray-400">₹45k / Unit</span>
+                    </div>
+                     <div class="p-2 rounded bg-white/5 border border-white/5 flex justify-between group hover:border-moneyGreen/50 transition">
+                        <span class="text-gray-300">Webcasting</span>
+                        <span class="font-mono text-blue-400">₹2k / Booth</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA ENGINE ---
+        
+        const macroData = [
+            { year: 1984, off: 81, act: 732 },
+            { year: 1989, off: 154, act: 1154 },
+            { year: 1996, off: 597, act: 3097 },
+            { year: 1999, off: 880, act: 5380 },
+            { year: 2004, off: 1016, act: 9516 },
+            { year: 2009, off: 1114, act: 19114 },
+            { year: 2014, off: 3870, act: 29870 },
+            { year: 2019, off: 8966, act: 59966 },
+            { year: 2024, off: 14500, act: 135000 }
+        ];
+
+        const projection = {
+            separate: { off: 21000, act: 231000, cpv: 2231 },
+            onoe: { off: 16500, act: 146500, cpv: 1415 }
+        };
+
+        let currentMode = 'reality'; 
+        let showIceberg = false; 
+        let mainChart;
+        let donutChart;
+
+        function init() {
+            initThreeJS();
+            initCharts();
+            updateDashboard();
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            
+            const btnReal = document.getElementById('btnReality');
+            const btnOnoe = document.getElementById('btnOnoe');
+            const savingsPanel = document.getElementById('savingsPanel');
+            const overlay = document.getElementById('chartOverlay');
+
+            if (mode === 'onoe') {
+                btnReal.className = "flex-1 md:flex-none px-4 md:px-6 py-2 rounded text-sm font-bold text-gray-500 hover:text-white transition-all";
+                btnOnoe.className = "flex-1 md:flex-none px-4 md:px-6 py-2 rounded text-sm font-bold transition-all bg-moneyGreen/20 text-moneyGreen border border-moneyGreen/50 shadow-[0_0_15px_rgba(16,185,129,0.3)]";
+                
+                savingsPanel.classList.remove('opacity-50', 'grayscale');
+                savingsPanel.classList.add('opacity-100');
+                overlay.style.opacity = '1';
+                
+                triggerMoneyRain();
+            } else {
+                btnReal.className = "flex-1 md:flex-none px-4 md:px-6 py-2 rounded text-sm font-bold transition-all bg-alertRed/20 text-red-400 border border-alertRed/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]";
+                btnOnoe.className = "flex-1 md:flex-none px-4 md:px-6 py-2 rounded text-sm font-bold text-gray-500 hover:text-white transition-all";
+                
+                savingsPanel.classList.add('opacity-50', 'grayscale');
+                savingsPanel.classList.remove('opacity-100');
+                overlay.style.opacity = '0';
+            }
+
+            updateDashboard();
+        }
+
+        function toggleIceberg() {
+            showIceberg = document.getElementById('icebergToggle').checked;
+            document.getElementById('depthLabel').innerText = showIceberg ? "Shadow Economy" : "Official Only";
+            document.getElementById('depthLabel').className = showIceberg ? "text-[10px] uppercase font-bold text-gold neon-gold" : "text-[10px] uppercase font-bold text-gray-400";
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            let targetCost = 0;
+            let targetCPV = 0;
+            let targetSavings = 0;
+
+            if (currentMode === 'reality') {
+                targetCost = showIceberg ? projection.separate.act : projection.separate.off;
+                targetCPV = projection.separate.cpv;
+            } else {
+                targetCost = showIceberg ? projection.onoe.act : projection.onoe.off;
+                targetCPV = projection.onoe.cpv;
+                
+                const sep = showIceberg ? projection.separate.act : projection.separate.off;
+                const onoe = showIceberg ? projection.onoe.act : projection.onoe.off;
+                targetSavings = sep - onoe;
+            }
+
+            animateValue("mainCostCounter", parseInt(document.getElementById("mainCostCounter").innerText.replace(/,/g,'')), targetCost, 1000);
+            document.getElementById("cpvCounter").innerText = `₹ ${Math.floor(targetCPV)}`;
+            document.getElementById("savingsCounter").innerText = `₹ ${targetSavings.toLocaleString()} Cr`;
+
+            document.getElementById("schoolsCount").innerText = Math.floor(targetSavings / 300); 
+            document.getElementById("roadsCount").innerText = Math.floor(targetSavings / 25); 
+
+            updateMainChart();
+        }
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const current = Math.floor(progress * (end - start) + start);
+                obj.innerHTML = current.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function initCharts() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [...macroData.map(d => d.year), 2029],
+                    datasets: [{
+                        label: 'Cost Curve',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#9ca3af', callback: function(value) { return '₹' + value/1000 + 'k Cr'; } } 
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: {family: 'Share Tech Mono'} }
+                        }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('donutChart').getContext('2d');
+            donutChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Official (ECI)', 'Campaign Ops', 'Unaccounted'],
+                    datasets: [{
+                        data: [14500, 45000, 75500],
+                        backgroundColor: ['#3b82f6', '#4b5563', '#fbbf24'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: { legend: { display: false } },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updateMainChart() {
+            const dataKey = showIceberg ? 'act' : 'off';
+            const history = macroData.map(d => d[dataKey]);
+            
+            const nextVal = currentMode === 'reality' ? projection.separate[dataKey] : projection.onoe[dataKey];
+            const fullData = [...history, nextVal];
+
+            mainChart.data.datasets[0].data = fullData;
+            
+            if (currentMode === 'onoe') {
+                mainChart.data.datasets[0].borderColor = '#10b981';
+                mainChart.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            } else {
+                mainChart.data.datasets[0].borderColor = '#ef4444';
+                mainChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            }
+            mainChart.update();
+        }
+
+        let scene, camera, renderer, particles;
+        
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-bg').appendChild(renderer.domElement);
+
+            createParticles();
+            camera.position.z = 30;
+            animateThree();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function createParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const count = 1000;
+            const positions = new Float32Array(count * 3);
+            for(let i = 0; i < count * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 100;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({ 
+                size: 0.2, 
+                color: 0xef4444, 
+                transparent: true, 
+                opacity: 0.8 
+            });
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function triggerMoneyRain() {
+            particles.material.color.setHex(0xfbbf24);
+        }
+
+        function animateThree() {
+            requestAnimationFrame(animateThree);
+            const positions = particles.geometry.attributes.position.array;
+            for(let i = 1; i < positions.length; i += 3) {
+                if (currentMode === 'reality') {
+                    positions[i] += 0.05; 
+                    if (positions[i] > 50) positions[i] = -50;
+                    particles.material.color.setHex(0xef4444);
+                } else {
+                    positions[i] -= 0.05;
+                    if (positions[i] < -50) positions[i] = 50;
+                    particles.material.color.setHex(0x10b981);
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            particles.rotation.y += 0.001;
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>

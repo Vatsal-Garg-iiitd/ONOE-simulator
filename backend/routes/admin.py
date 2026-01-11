@@ -9,29 +9,47 @@ from admin_risk_engine import admin_risk_engine, AdminDashboardData
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
-class SliderUpdate(BaseModel):
+class BottleneckRequest(BaseModel):
     sliders: Dict[str, float]
+    context: Dict[str, Any] = None
+
+class DashboardInput(BaseModel):
+    target_year: int = 2029
+    evm_supply: float = 100.0
+    security_personnel: float = 100.0
 
 @router.get("/dashboard", response_model=AdminDashboardData)
 async def get_dashboard():
     """
-    Get all data for the Administrative Engine Dashboard.
+    Get initial dashboard data (defaults).
     """
     try:
         data = admin_risk_engine.get_dashboard_data()
         return data
     except Exception as e:
         print(f"Error getting admin dashboard: {e}")
-        # Return mock data if something fails
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/impact")
-async def calculate_impact(request: SliderUpdate):
+@router.post("/dashboard", response_model=AdminDashboardData)
+async def update_dashboard(inputs: DashboardInput):
     """
-    Calculate risk impact based on slider values (Bottleneck Explorer).
+    Get dashboard data with custom inputs.
     """
     try:
-        result = admin_risk_engine.calculate_slider_impact(request.sliders)
+        data = admin_risk_engine.get_dashboard_data(inputs.dict())
+        return data
+    except Exception as e:
+        print(f"Error updating admin dashboard: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/bottleneck/analyze")
+async def analyze_bottlenecks(inputs: DashboardInput):
+    """
+    Intelligently analyze bottlenecks using LLM based on current administrative context.
+    """
+    try:
+        result = admin_risk_engine.analyze_bottlenecks(inputs.dict())
         return result
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+

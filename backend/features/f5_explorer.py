@@ -13,7 +13,7 @@ class ExplorerSystem:
                     "toggle_id": "census_sync",
                     "question": "Is census synchronization mechanism implemented?",
                     "current_state": False,
-                    "impact_if_true": -10.0,
+                    "impact_if_true": -35.0,
                     "impact_if_false": 5.0,
                     "description": "If census readjustment is synchronized with ONOE cycle, risk decreases significantly"
                 }
@@ -23,7 +23,7 @@ class ExplorerSystem:
                     "toggle_id": "co_terminus",
                     "question": "Is co-terminus provision implemented?",
                     "current_state": False,
-                    "impact_if_true": -10.0,
+                    "impact_if_true": -40.0,
                     "impact_if_false": 10.0,
                     "description": "Co-terminus provision ensures Lok Sabha and State Assemblies expire together"
                 }
@@ -33,7 +33,7 @@ class ExplorerSystem:
                     "toggle_id": "simultaneous_dissolution",
                     "question": "Is simultaneous dissolution protocol defined?",
                     "current_state": False,
-                    "impact_if_true": -8.0,
+                    "impact_if_true": -30.0,
                     "impact_if_false": 7.0,
                     "description": "Protocol for dissolving both Lok Sabha and State Assemblies simultaneously"
                 }
@@ -43,7 +43,7 @@ class ExplorerSystem:
                     "toggle_id": "state_sync",
                     "question": "Is state assembly synchronization completed?",
                     "current_state": False,
-                    "impact_if_true": -12.0,
+                    "impact_if_true": -40.0,
                     "impact_if_false": 12.0,
                     "description": "All 28 state assemblies synchronized to common expiry date"
                 }
@@ -53,7 +53,7 @@ class ExplorerSystem:
                     "toggle_id": "governor_restriction",
                     "question": "Are Governor's dissolution powers restricted during ONOE?",
                     "current_state": False,
-                    "impact_if_true": -8.0,
+                    "impact_if_true": -35.0,
                     "impact_if_false": 9.0,
                     "description": "Constitutional safeguard preventing arbitrary dissolution by Governors"
                 }
@@ -63,8 +63,8 @@ class ExplorerSystem:
                     "toggle_id": "presidents_rule_procedure",
                     "question": "Is Article 356 procedure for ONOE elections defined?",
                     "current_state": False,
-                    "impact_if_true": -20.0,
-                    "impact_if_false": 15.0,
+                    "impact_if_true": -60.0,
+                    "impact_if_false": 5.0,
                     "description": "CRITICAL: Constitutional procedure for conducting elections in states under President's Rule during ONOE"
                 }
             ]

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Governance Simulator | Module C</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Inter"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+                    colors: { 
+                        govBlue: '#0ea5e9',
+                        govDark: '#0f172a',
+                        alertRed: '#ef4444',
+                        successGreen: '#10b981',
+                        surface: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; overflow: hidden; }
+        
+        /* Dashboard Panel Style */
+        .panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+
+        /* Pipeline Animation */
+        .pipeline-grid {
+            background-image: linear-gradient(#334155 1px, transparent 1px), linear-gradient(90deg, #334155 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.1;
+        }
+
+        .file-packet {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col p-4 font-sans">
+
+    <header class="flex justify-between items-center mb-4 px-2">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-400 rounded flex items-center justify-center font-bold text-lg">C</div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-white">Governance Impact Simulator</h1>
+                <p class="text-xs text-gray-400 font-mono">MODEL CODE OF CONDUCT (MCC) // EFFICIENCY ANALYSIS</p>
+            </div>
+        </div>
+        <div class="flex gap-4 text-right">
+            <div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Est. Opportunity Cost</div>
+                <div class="text-xl font-mono text-alertRed font-bold" id="total-cost-ticker">₹ 0 Cr</div>
+            </div>
+            <div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Active Policy Days</div>
+                <div class="text-xl font-mono text-successGreen font-bold" id="days-active-ticker">0 / 1825</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-grow grid grid-cols-12 gap-4 h-full overflow-hidden">
+
+        <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+            
+            <div class="panel rounded-lg p-5 flex flex-col gap-6">
+                <h2 class="text-sm font-bold uppercase text-gray-400 border-b border-gray-700 pb-2">Simulation Variables</h2>
+                
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <label class="text-xs font-semibold text-white">Election Cycle Type</label>
+                        <span id="label-freq" class="text-xs font-mono text-cyan-400">Current (Fragmented)</span>
+                    </div>
+                    <input type="range" id="slider-freq" min="0" max="1" step="1" value="0" class="mb-2" oninput="updateSimulation()">
+                    <p class="text-[10px] text-gray-500 leading-tight">
+                        0 = Separate National & State polls (Continuous MCC).<br>
+                        1 = Synchronized ONOE (Single MCC window).
+                    </p>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <label class="text-xs font-semibold text-white">MCC Strictness (Days)</label>
+                        <span id="label-strict" class="text-xs font-mono text-cyan-400">75 Days/Poll</span>
+                    </div>
+                    <input type="range" id="slider-strict" min="45" max="90" step="5" value="75" class="mb-2" oninput="updateSimulation()">
+                    <p class="text-[10px] text-gray-500 leading-tight">Average duration the Code of Conduct freezes new tenders per election event.</p>
+                </div>
+
+                <div class="bg-black/30 rounded p-3 border border-white/5 mt-2">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] text-gray-400 uppercase">System Status</span>
+                        <div id="system-status-indicator" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                    </div>
+                    <div id="system-status-text" class="text-lg font-mono font-bold text-red-400">PARALYZED</div>
+                    <div id="system-status-sub" class="text-[10px] text-gray-500">MCC Active: Tenders Blocked</div>
+                </div>
+            </div>
+
+            <div class="panel rounded-lg p-5 flex-grow overflow-y-auto">
+                <h2 class="text-sm font-bold uppercase text-gray-400 border-b border-gray-700 pb-2 mb-4">Resource Diversion</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-300">Security Forces (CAPF)</span>
+                            <span class="font-mono text-white" id="capf-val">High</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-2 rounded-full">
+                            <div id="bar-capf" class="bg-orange-500 h-2 rounded-full w-[90%] transition-all duration-700"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-300">Teachers/Civil Staff</span>
+                            <span class="font-mono text-white" id="staff-val">11 Million</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-2 rounded-full">
+                            <div id="bar-staff" class="bg-blue-500 h-2 rounded-full w-[85%] transition-all duration-700"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-900/20 border border-blue-500/20 p-3 rounded text-[11px] text-blue-200 leading-relaxed mt-4">
+                        <strong class="block mb-1 text-blue-400">Data Point:</strong>
+                        According to NITI Aayog (2017), frequent elections keep security forces in constant transit, reducing availability for internal security by <span id="security-impact">30%</span> annually.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 flex flex-col gap-4">
+            
+            <div class="panel rounded-lg p-0 relative h-[300px] overflow-hidden flex flex-col">
+                <div class="absolute inset-0 pipeline-grid z-0"></div>
+                
+                <div class="relative z-10 bg-gray-900/80 backdrop-blur border-b border-gray-700 p-3 flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase text-white">Policy Execution Pipeline (5 Year Term)</h3>
+                    <div class="flex gap-2">
+                        <span class="flex items-center gap-1 text-[10px] text-gray-400"><div class="w-2 h-2 bg-white rounded-sm"></div> Active Project</span>
+                        <span class="flex items-center gap-1 text-[10px] text-gray-400"><div class="w-2 h-2 bg-red-500 rounded-sm"></div> Stalled</span>
+                    </div>
+                </div>
+
+                <div id="pipeline-container" class="relative flex-grow w-full overflow-hidden">
+                    </div>
+
+                <div class="relative h-12 bg-gray-900 border-t border-gray-700 flex items-end px-4 pb-2 z-20">
+                    <div class="absolute top-0 left-0 h-1 bg-blue-500 transition-all duration-100 ease-linear" id="timeline-progress" style="width: 0%"></div>
+                    <div class="flex justify-between w-full text-[10px] font-mono text-gray-500 uppercase">
+                        <span>Year 1</span>
+                        <span>Year 2</span>
+                        <span>Year 3</span>
+                        <span>Year 4</span>
+                        <span>Year 5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-grow grid grid-cols-2 gap-4">
+                <div class="panel rounded-lg p-4">
+                    <h3 class="text-[10px] font-bold uppercase text-gray-400 mb-2">Days Lost to MCC (Cumulative)</h3>
+                    <div class="h-[180px]">
+                        <canvas id="mccChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel rounded-lg p-4">
+                    <h3 class="text-[10px] font-bold uppercase text-gray-400 mb-2">Project Completion Rate</h3>
+                    <div class="h-[180px] flex items-center justify-center relative">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="56" stroke="#334155" stroke-width="12" fill="transparent" />
+                            <circle id="completion-ring" cx="64" cy="64" r="56" stroke="#0ea5e9" stroke-width="12" fill="transparent" stroke-dasharray="351" stroke-dashoffset="100" class="transition-all duration-1000" />
+                        </svg>
+                        <div class="absolute text-center">
+                            <span id="completion-text" class="text-2xl font-bold font-mono text-white">62%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+            
+            <div class="panel rounded-lg flex flex-col h-full overflow-hidden">
+                <div class="p-4 border-b border-gray-700 bg-gray-800/50">
+                    <h2 class="text-sm font-bold uppercase text-white">Project Status Log</h2>
+                    <p class="text-[10px] text-gray-400">Based on IDFC & PIB Infrastructure Data</p>
+                </div>
+
+                <div class="overflow-y-auto p-2 space-y-2 flex-grow" id="project-log">
+                    </div>
+
+                <div class="p-3 bg-gray-900 border-t border-gray-700">
+                    <div class="text-[10px] text-gray-500 uppercase mb-1">GDP Impact Projection</div>
+                    <div class="flex items-center justify-between">
+                        <span id="gdp-impact" class="text-lg font-bold text-red-400">-0.8% Growth</span>
+                        <span class="text-xs text-gray-400">(Annual Drag)</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const projectData = [
+            { name: "Rural Roads Phase IV", value: 12000, risk: "High", status: "Active" },
+            { name: "Metro Line Expansion", value: 45000, risk: "Med", status: "Active" },
+            { name: "Smart City Tender", value: 8500, risk: "High", status: "Active" },
+            { name: "Defence Corridor", value: 22000, risk: "Low", status: "Active" },
+            { name: "Water Mission (JJM)", value: 55000, risk: "High", status: "Active" },
+            { name: "Port Modernization", value: 15000, risk: "Med", status: "Active" },
+            { name: "Expressway Land Acq.", value: 30000, risk: "High", status: "Active" }
+        ];
+
+        let state = {
+            isONOE: false,
+            mccDuration: 75,
+            mccTotalDays: 450, // Default for separate elections
+            costPerDay: 450, // Cr INR (Hypothetical value of stalled activity)
+            activePackets: [],
+            isParalyzed: false
+        };
+
+        let chartInstance = null;
+        let animationFrame = null;
+
+        // --- INIT ---
+        function init() {
+            initChart();
+            renderProjects();
+            updateSimulation(); // Run once to set initial state
+            loop(); // Start animation loop
+        }
+
+        // --- CORE LOGIC ---
+        function updateSimulation() {
+            // Get Slider Values
+            const freqSlider = document.getElementById('slider-freq');
+            const strictSlider = document.getElementById('slider-strict');
+            
+            state.isONOE = freqSlider.value === "1";
+            state.mccDuration = parseInt(strictSlider.value);
+
+            // Update Labels
+            document.getElementById('label-freq').innerText = state.isONOE ? "Synchronized (ONOE)" : "Current (Fragmented)";
+            document.getElementById('label-freq').className = state.isONOE ? "text-xs font-mono text-green-400" : "text-xs font-mono text-orange-400";
+            document.getElementById('label-strict').innerText = state.mccDuration + " Days/Poll";
+
+            // Recalculate Logic
+            if (state.isONOE) {
+                // One election block every 5 years
+                state.mccTotalDays = state.mccDuration; // Just one instance
+                document.getElementById('bar-capf').style.width = "20%";
+                document.getElementById('bar-capf').classList.replace('bg-orange-500', 'bg-green-500');
+                document.getElementById('capf-val').innerText = "Optimal";
+                
+                document.getElementById('bar-staff').style.width = "15%";
+                document.getElementById('bar-staff').classList.replace('bg-blue-500', 'bg-green-500');
+                
+                document.getElementById('gdp-impact').innerText = "+1.5% Boost";
+                document.getElementById('gdp-impact').className = "text-lg font-bold text-green-400";
+                
+                document.getElementById('completion-ring').style.strokeDashoffset = "35"; // ~90%
+                document.getElementById('completion-text').innerText = "92%";
+                
+                document.getElementById('security-impact').innerText = "5%";
+            } else {
+                // Multiple elections (National + ~5-6 state batches)
+                // Approx 6 major separate election events in 5 years * duration
+                state.mccTotalDays = state.mccDuration * 6; 
+                
+                document.getElementById('bar-capf').style.width = "90%";
+                document.getElementById('bar-capf').classList.replace('bg-green-500', 'bg-orange-500');
+                document.getElementById('capf-val').innerText = "Critical";
+
+                document.getElementById('bar-staff').style.width = "85%";
+                document.getElementById('bar-staff').classList.replace('bg-green-500', 'bg-blue-500');
+
+                document.getElementById('gdp-impact').innerText = "-0.8% Drag";
+                document.getElementById('gdp-impact').className = "text-lg font-bold text-red-400";
+
+                document.getElementById('completion-ring').style.strokeDashoffset = "140"; // ~60%
+                document.getElementById('completion-text').innerText = "62%";
+
+                document.getElementById('security-impact').innerText = "30%";
+            }
+
+            // Update Charts
+            updateChart();
+        }
+
+        // --- ANIMATION LOOP ---
+        let time = 0;
+        let timelineProgress = 0;
+
+        function loop() {
+            time++;
+            timelineProgress += 0.05; // Speed of 5 years passing
+            if (timelineProgress > 100) timelineProgress = 0;
+            
+            document.getElementById('timeline-progress').style.width = timelineProgress + "%";
+
+            // Determine if MCC is active based on timeline
+            // If ONOE: MCC is only at the very end (95-100%) or start
+            // If Fragmented: MCC triggers every ~15-20% of timeline
+            
+            let isMccNow = false;
+            
+            if (state.isONOE) {
+                if (timelineProgress > 95) isMccNow = true;
+            } else {
+                // Triggers at 15%, 30%, 50%, 70%, 85%
+                if ( (timelineProgress > 15 && timelineProgress < 20) || 
+                     (timelineProgress > 35 && timelineProgress < 40) ||
+                     (timelineProgress > 55 && timelineProgress < 60) ||
+                     (timelineProgress > 75 && timelineProgress < 80) ) {
+                    isMccNow = true;
+                }
+            }
+
+            setSystemStatus(isMccNow);
+            spawnPackets();
+            movePackets();
+            updateTickers(timelineProgress);
+
+            animationFrame = requestAnimationFrame(loop);
+        }
+
+        function setSystemStatus(isFrozen) {
+            state.isParalyzed = isFrozen;
+            const indicator = document.getElementById('system-status-indicator');
+            const text = document.getElementById('system-status-text');
+            const sub = document.getElementById('system-status-sub');
+            const pipeline = document.getElementById('pipeline-container');
+
+            if (isFrozen) {
+                indicator.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
+                text.innerText = "PARALYZED";
+                text.className = "text-lg font-mono font-bold text-red-400";
+                sub.innerText = "MCC Active: Tenders Blocked";
+                pipeline.classList.add('opacity-50', 'grayscale');
+            } else {
+                indicator.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]";
+                text.innerText = "OPERATIONAL";
+                text.className = "text-lg font-mono font-bold text-green-400";
+                sub.innerText = "Governance Velocity: Normal";
+                pipeline.classList.remove('opacity-50', 'grayscale');
+            }
+            updateProjectListStatus(isFrozen);
+        }
+
+        function spawnPackets() {
+            // Spawn less frequently if paralyzed, or stop completely?
+            // Realistically, files pile up. Let's spawn but stack them.
+            if (Math.random() > 0.95) {
+                const p = document.createElement('div');
+                const types = ['bg-white', 'bg-blue-400', 'bg-cyan-300'];
+                const color = types[Math.floor(Math.random() * types.length)];
+                
+                p.className = `absolute w-8 h-6 rounded ${color} file-packet flex items-center justify-center text-[8px] font-bold text-black z-10`;
+                p.innerText = "FILE";
+                p.style.top = (Math.random() * 250) + "px";
+                p.style.left = "-40px";
+                
+                document.getElementById('pipeline-container').appendChild(p);
+                
+                state.activePackets.push({
+                    el: p,
+                    x: -40,
+                    speed: 2 + Math.random()
+                });
+            }
+        }
+
+        function movePackets() {
+            // If paralyzed, speed drops to near zero
+            const speedMultiplier = state.isParalyzed ? 0.05 : 1;
+
+            state.activePackets.forEach((pkt, index) => {
+                pkt.x += pkt.speed * speedMultiplier;
+                pkt.el.style.transform = `translateX(${pkt.x}px)`;
+
+                // If paralyzed, change visual style to red outline
+                if (state.isParalyzed) {
+                    pkt.el.style.border = "2px solid red";
+                } else {
+                    pkt.el.style.border = "none";
+                }
+
+                // Cleanup
+                if (pkt.x > document.getElementById('pipeline-container').offsetWidth) {
+                    pkt.el.remove();
+                    state.activePackets.splice(index, 1);
+                }
+            });
+        }
+
+        function updateTickers(progress) {
+            // Active Days
+            const totalDays = 1825; // 5 years
+            const daysPassed = Math.floor((progress / 100) * totalDays);
+            const blockedRatio = state.isONOE ? (state.mccDuration / totalDays) : ((state.mccDuration * 6) / totalDays);
+            const daysLost = Math.floor(daysPassed * blockedRatio);
+            
+            document.getElementById('days-active-ticker').innerText = (daysPassed - daysLost) + " / " + daysPassed;
+
+            // Cost Ticker
+            // Base cost accumulation + penalty when paralyzed
+            let currentCost = parseInt(document.getElementById('total-cost-ticker').innerText.replace(/[^0-9]/g, '')) || 0;
+            if (state.isParalyzed) {
+                currentCost += 150; // High cost during paralysis (Cr)
+            }
+            // Reset if loop resets
+            if (progress < 1) currentCost = 0;
+            
+            document.getElementById('total-cost-ticker').innerText = "₹ " + currentCost.toLocaleString();
+        }
+
+        // --- CHART JS ---
+        function initChart() {
+            const ctx = document.getElementById('mccChart').getContext('2d');
+            Chart.defaults.font.family = "Inter";
+            Chart.defaults.color = "#94a3b8";
+            
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Governance Days', 'MCC Blocked Days'],
+                    datasets: [{
+                        label: 'Days (5 Years)',
+                        data: [1375, 450],
+                        backgroundColor: ['#0ea5e9', '#ef4444'],
+                        borderRadius: 4,
+                        barThickness: 30
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#334155' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const total = 1825;
+            const blocked = state.mccTotalDays;
+            const active = total - blocked;
+            
+            chartInstance.data.datasets[0].data = [active, blocked];
+            // Update colors if ONOE
+            if(state.isONOE) {
+                chartInstance.data.datasets[0].backgroundColor = ['#0ea5e9', '#22c55e']; // Blue and Green (Active vs Low Block)
+            } else {
+                chartInstance.data.datasets[0].backgroundColor = ['#0ea5e9', '#ef4444']; // Blue and Red
+            }
+            chartInstance.update();
+        }
+
+        // --- PROJECT LIST ---
+        function renderProjects() {
+            const container = document.getElementById('project-log');
+            container.innerHTML = '';
+            
+            projectData.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "p-3 rounded bg-white/5 border-l-2 border-green-500 transition-colors duration-300 project-card";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-white">${p.name}</span>
+                        <span class="text-[10px] font-mono text-gray-400">₹${p.value} Cr</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                         <span class="text-[10px] status-text text-green-400">EXECUTING...</span>
+                         <div class="w-16 h-1 bg-gray-700 rounded overflow-hidden">
+                            <div class="h-full bg-green-500 w-1/2 progress-bar animate-pulse"></div>
+                         </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateProjectListStatus(isFrozen) {
+            const cards = document.querySelectorAll('.project-card');
+            cards.forEach(card => {
+                const statusText = card.querySelector('.status-text');
+                const progressBar = card.querySelector('.progress-bar');
+                
+                if (isFrozen) {
+                    card.classList.replace('border-green-500', 'border-red-500');
+                    statusText.innerText = "BLOCKED (MCC)";
+                    statusText.className = "text-[10px] status-text text-red-400";
+                    progressBar.classList.replace('bg-green-500', 'bg-red-500');
+                    progressBar.style.width = "50%"; // Stuck
+                } else {
+                    card.classList.replace('border-red-500', 'border-green-500');
+                    statusText.innerText = "EXECUTING...";
+                    statusText.className = "text-[10px] status-text text-green-400";
+                    progressBar.classList.replace('bg-red-500', 'bg-green-500');
+                }
+            });
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

@@ -11,10 +11,10 @@ from models import VulnerabilityScoreAssessment, RiskMitigationResponse, Mitigat
 from typing import TypedDict, List, Dict
 import json
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(find_dotenv())
 
 # ============================================================================
 # STATE DEFINITION
@@ -51,7 +51,8 @@ def get_llm():
             huggingfacehub_api_token=api_key,
             temperature=0.7,
             max_new_tokens=512,
-            top_p=0.95
+            top_p=0.95,
+            endpoint_url="https://router.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta"
         )
         model = ChatHuggingFace(llm=llm)
         return model
@@ -69,7 +70,7 @@ def vulnerability_llm():
     
     try:
         llm = HuggingFaceEndpoint(
-            repo_id="HuggingFaceH4/zephyr-7b-beta",
+            repo_id="mistralai/Mistral-7B-Instruct-v0.2",
             huggingfacehub_api_token=api_key,
             temperature=0.7,
             max_new_tokens=512,
@@ -78,7 +79,7 @@ def vulnerability_llm():
         model = ChatHuggingFace(llm=llm)
         return model
     except Exception as e:
-        print(f"Error initializing Zephyr: {e}")
+        print(f"Error initializing LLM: {e}")
         return None
 
 # ============================================================================
@@ -429,7 +430,7 @@ class EnhancedDebateAgent:
             final_state["court_argument"] = "Amendment violates basic structure"
         
         # Calculate risk contribution
-        risk_weight = 40 if article_number == 356 else 25
+        risk_weight = 30 if article_number == 356 else 25
         risk_contribution = final_state["vulnerability_score"] * risk_weight
         
         return {

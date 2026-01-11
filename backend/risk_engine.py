@@ -19,7 +19,7 @@ class RiskEngine:
                 "name": "Article 82: Readjustment After Census",
                 "description": "Governs reallocation of Lok Sabha seats after census. No synchronization provision with state assemblies.",
                 "base_risk": 25.0,
-                "features": ["F2", "F5", "F7"]
+                "features": ["F2", "F4", "F5", "F7"]
             },
             83: {
                 "name": "Article 83(2): Duration of Lok Sabha",
@@ -31,24 +31,24 @@ class RiskEngine:
                 "name": "Article 85: Presidential Dissolution",
                 "description": "President can dissolve LS but no provision for simultaneous state dissolution.",
                 "base_risk": 15.0,
-                "features": ["F2", "F5", "F7"]
+                "features": ["F2", "F4", "F5", "F7"]
             },
             172: {
                 "name": "Article 172(1): Duration of State Legislatures",
                 "description": "28 states with different expiry dates. Creates 2-3 elections per year.",
                 "base_risk": 25.0,
-                "features": ["F1", "F2", "F3", "F5", "F7"]
+                "features": ["F1", "F2", "F3", "F4", "F5", "F7"]
             },
             174: {
                 "name": "Article 174: Governor Dissolution Powers",
                 "description": "Governor can dissolve assembly anytime, breaking ONOE timing.",
                 "base_risk": 20.0,
-                "features": ["F2", "F5", "F7"]
+                "features": ["F2", "F4", "F5", "F7"]
             },
             356: {
                 "name": "Article 356: President's Rule",
                 "description": "CRITICAL: No procedure for elections during President's Rule in ONOE. 73% probability of occurrence.",
-                "base_risk": 35.0,
+                "base_risk": 20.0,
                 "features": ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"]
             }
         }
@@ -120,7 +120,8 @@ class RiskEngine:
         if components.feature_3_precedent:
             final_risk += components.feature_3_precedent
         if components.feature_4_confidence:
-            final_risk += components.feature_4_confidence["risk_contribution"]
+            # F4 is now informational only (graph data), extends analysis but doesn't add score
+            pass
         if components.feature_5_explorer:
             final_risk += components.feature_5_explorer
         if components.feature_6_political:

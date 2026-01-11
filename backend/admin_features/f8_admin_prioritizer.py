@@ -16,6 +16,6 @@ class ExecutionPrioritizer:
         ]
     
     def get_risk_contribution(self) -> float:
-        return 4.0
+        return 0.0
 
 execution_prioritizer = ExecutionPrioritizer()
